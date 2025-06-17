@@ -73,9 +73,9 @@ class NoFriendView: UIView {
         ])
 
         // 為了後續 gradientLayer 正確更新 frame → 加入 layoutSubviews 動態更新
-        button.layoutSubviewsCallback = {
-            gradientLayer.frame = button.bounds
-        }
+//        button.layoutSubviewsCallback = {
+//            gradientLayer.frame = button.bounds
+//        }
 
         return button
     }()

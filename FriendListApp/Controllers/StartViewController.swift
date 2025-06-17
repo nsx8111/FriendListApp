@@ -8,26 +8,26 @@
 import UIKit
 
 class StartViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupButtons()
     }
-
+    
     private func setupButtons() {
         let noFriendButton = makeButton(title: "無好友", tag: 0)
         let noInvitationsButton = makeButton(title: "好友列表無邀請", tag: 1)
         let invitedFriendButton = makeButton(title: "好友列表含邀請好友", tag: 2)
-
+        
         let stackView = UIStackView(arrangedSubviews: [noFriendButton, noInvitationsButton, invitedFriendButton])
         stackView.axis = .vertical
         stackView.spacing = 30
         stackView.alignment = .center
         stackView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         view.addSubview(stackView)
-
+        
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)

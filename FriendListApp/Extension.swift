@@ -38,21 +38,21 @@ extension Int {
 
 
 extension UIButton {
-    private struct AssociatedKeys {
-        static var layoutSubviewsCallbackKey = "layoutSubviewsCallbackKey"
-    }
-
-    var layoutSubviewsCallback: (() -> Void)? {
-        get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.layoutSubviewsCallbackKey) as? (() -> Void)
-        }
-        set {
-            objc_setAssociatedObject(self, &AssociatedKeys.layoutSubviewsCallbackKey, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
-        }
-    }
-
-    open override func layoutSubviews() {
-        super.layoutSubviews()
-        layoutSubviewsCallback?()
-    }
+//    private struct AssociatedKeys {
+//        static var layoutSubviewsCallbackKey = "layoutSubviewsCallbackKey"
+//    }
+//
+//    var layoutSubviewsCallback: (() -> Void)? {
+//        get {
+//            return objc_getAssociatedObject(self, &AssociatedKeys.layoutSubviewsCallbackKey) as? (() -> Void)
+//        }
+//        set {
+//            objc_setAssociatedObject(self, &AssociatedKeys.layoutSubviewsCallbackKey, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+//        }
+//    }
+//
+//    open override func layoutSubviews() {
+//        super.layoutSubviews()
+//        layoutSubviewsCallback?()
+//    }
 }

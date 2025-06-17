@@ -16,8 +16,7 @@ enum MainContentType {
 
 class MainViewController: UIViewController {
     var contentType: MainContentType = .noFriend
-//    private var friendChatPageViewController = FriendChatPageViewController()
-
+    
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let tabBarView = TabBarView()
 
@@ -46,10 +45,9 @@ class MainViewController: UIViewController {
     }
     
     private func setupLayout() {
-//        friendChatPageViewController.contentType = contentType
-//        if let friendVC = pages[1] as? FriendChatPageViewController {
-//            friendVC.updateFriendView(contentType: contentType)
-//        }
+        if let friendVC = pages[1] as? FriendChatPageViewController {
+            friendVC.contentType = contentType
+        }
 
         [pageViewController.view, tabBarView].forEach {
             view.addSubview($0)
