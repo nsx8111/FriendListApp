@@ -9,7 +9,6 @@ import Foundation
 import UIKit
 
 class FriendChatPageViewController: UIViewController {
-    var contentType: MainContentType = .noFriend
 
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let navigationBar = NavigationBarView()
@@ -26,9 +25,6 @@ class FriendChatPageViewController: UIViewController {
 
         setupLayout()
         setupPageViewController()
-        if let friendVC = pages[0] as? FriendViewController {
-            friendVC.setupView(for: contentType)
-        }
     }
 
     private func setupLayout() {

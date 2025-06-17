@@ -22,7 +22,7 @@ class StartViewController: UIViewController {
         
         let stackView = UIStackView(arrangedSubviews: [noFriendButton, noInvitationsButton, invitedFriendButton])
         stackView.axis = .vertical
-        stackView.spacing = 30
+        stackView.spacing = 60
         stackView.alignment = .center
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -48,16 +48,19 @@ class StartViewController: UIViewController {
         button.heightAnchor.constraint(equalToConstant: 50).isActive = true
         return button
     }
-
+    
     @objc private func buttonTapped(_ sender: UIButton) {
+        // 設定目前全域狀態
+        switch sender.tag {
+        case 1:
+            MainContentManager.shared.currentType = .noInvitations
+        case 2:
+            MainContentManager.shared.currentType = .invitedFriend
+        default:
+            MainContentManager.shared.currentType = .noFriend
+        }
+        
         let mainVC = MainViewController()
-        mainVC.contentType = {
-            switch sender.tag {
-            case 1: return .noInvitations
-            case 2: return .invitedFriend
-            default: return .noFriend
-            }
-        }()
         mainVC.modalPresentationStyle = .fullScreen
         present(mainVC, animated: true)
     }

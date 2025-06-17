@@ -8,14 +8,7 @@
 import Foundation
 import UIKit
 
-enum MainContentType {
-    case noFriend
-    case noInvitations
-    case invitedFriend
-}
-
 class MainViewController: UIViewController {
-    var contentType: MainContentType = .noFriend
     
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let tabBarView = TabBarView()
@@ -45,10 +38,7 @@ class MainViewController: UIViewController {
     }
     
     private func setupLayout() {
-        if let friendVC = pages[1] as? FriendChatPageViewController {
-            friendVC.contentType = contentType
-        }
-
+        
         [pageViewController.view, tabBarView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -76,7 +66,7 @@ class MainViewController: UIViewController {
     }
     
     private func switchToPage(index: Int) {
-        print("currentIndex",index, currentIndex)
+//        print("currentIndex",index, currentIndex)
         let direction: UIPageViewController.NavigationDirection = index > currentIndex ? .forward : .reverse
         pageViewController.setViewControllers([pages[index]], direction: direction, animated: true)
         currentIndex = index
