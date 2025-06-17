@@ -72,11 +72,6 @@ class NoFriendView: UIView {
             iconImageView.heightAnchor.constraint(equalToConstant: 24.scalePt())
         ])
 
-        // 為了後續 gradientLayer 正確更新 frame → 加入 layoutSubviews 動態更新
-//        button.layoutSubviewsCallback = {
-//            gradientLayer.frame = button.bounds
-//        }
-
         return button
     }()
     
@@ -106,7 +101,19 @@ class NoFriendView: UIView {
         label.isUserInteractionEnabled = true
         return label
     }()
-
+    
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = UIColor.white
+        tableView.separatorStyle = .singleLine
+        tableView.separatorColor = UIColor.systemGray5
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 71.scalePt(), bottom: 0, right: 0) // 16 + 40 + 15 = 71
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
+    
+    private var allFriends: [Friend] = []      // 原始完整資料
+    private var filteredFriends: [Friend] = [] // 顯示用的資料
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -117,12 +124,25 @@ class NoFriendView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func updateFriendList(_ friends: [Friend]) {
+        allFriends = friends
+        filteredFriends = friends
+        tableView.reloadData()
+        if filteredFriends.count == 0 {
+            tableView.isHidden = true
+        }
+    }
+    
     private func setupView() {
         [helpLabel, setKokoIdLabel].forEach {
             helpContainerView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         [imageView, titleLabel, descLabel, addButton, helpContainerView].forEach {
+            addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        [tableView].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }

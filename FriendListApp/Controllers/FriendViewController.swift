@@ -9,63 +9,78 @@ import UIKit
 
 class FriendViewController: UIViewController {
 
-    var friendView: UIView?
+    private let viewModel = FriendViewModel()
+    private let noFriendView = NoFriendView()
+    private let noInvitationsView = NoInvitationsView()
+    private let invitedFriendView = InvitedFriendView()
 
-    func updateFriendView(contentType: MainContentType) {
-        // 先移除原本 friendView
-        friendView?.removeFromSuperview()
+    var contentType: MainContentType = .noFriend
 
-        switch contentType {
-        case .noFriend:
-            let view = NoFriendView()
-            friendView = view
-        case .noInvitations:
-            let view = NoInvitationsView()
-            friendView = view
-        case .invitedFriend:
-            let view = InvitedFriendView()
-            friendView = view
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        setupView(for: contentType)
+        
+        noInvitationsView.onRequestRefresh = { [weak self] in
+            self?.setupView(for: .noInvitations)
         }
+        invitedFriendView.onRequestRefresh = { [weak self] in
+            self?.setupView(for: .invitedFriend)
+        }
+    }
+    
+    func setupView(for type: MainContentType) {
+        [noFriendView, noInvitationsView, invitedFriendView].forEach {
+            $0.removeFromSuperview()
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        let urls: [String]
 
-        guard let friendView = friendView else { return }
-
-        view.addSubview(friendView)
-        friendView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            friendView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            friendView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            friendView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            friendView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        switch type {
+        case .noFriend:
+            view.addSubview(noFriendView)
+            NSLayoutConstraint.activate([
+                noFriendView.topAnchor.constraint(equalTo: view.topAnchor),
+                noFriendView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                noFriendView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                noFriendView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+            urls = ["https://dimanyen.github.io/friend4.json"]
+            viewModel.fetchFriends(urls: urls) { [weak self] friends in
+                DispatchQueue.main.async {
+                    self?.noFriendView.updateFriendList(friends)
+                }
+            }
+        case .noInvitations:
+            view.addSubview(noInvitationsView)
+            NSLayoutConstraint.activate([
+                noInvitationsView.topAnchor.constraint(equalTo: view.topAnchor),
+                noInvitationsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                noInvitationsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                noInvitationsView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+            urls = ["https://dimanyen.github.io/friend1.json", "https://dimanyen.github.io/friend2.json"]
+            viewModel.fetchFriends(urls: urls) { [weak self] friends in
+                DispatchQueue.main.async {
+                    self?.noInvitationsView.updateFriendList(friends)
+                    self?.noInvitationsView.endRefreshing()
+                }
+            }
+        case .invitedFriend:
+            view.addSubview(invitedFriendView)
+            NSLayoutConstraint.activate([
+                invitedFriendView.topAnchor.constraint(equalTo: view.topAnchor),
+                invitedFriendView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                invitedFriendView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                invitedFriendView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+            urls = ["https://dimanyen.github.io/friend3.json"]
+            viewModel.fetchFriends(urls: urls) { [weak self] friends in
+                DispatchQueue.main.async {
+                    self?.invitedFriendView.updateFriendList(friends)
+                    self?.invitedFriendView.endRefreshing()
+                }
+            }
+        }
     }
 }
-
-
-
-
-
-
-//class FriendViewController: UIViewController {
-//
-//    private let viewModel = FriendViewModel()
-//    private let noFriendView = NoInvitationsView()
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        view.backgroundColor = .white
-//        setupLayout()
-//    }
-//
-//    private func setupLayout() {
-//        view.addSubview(noFriendView)
-//        noFriendView.translatesAutoresizingMaskIntoConstraints = false
-//
-//        NSLayoutConstraint.activate([
-//            noFriendView.topAnchor.constraint(equalTo: view.topAnchor),
-//            noFriendView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            noFriendView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            noFriendView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-//        ])
-//    }
-//}

@@ -5,11 +5,7 @@ class FriendViewModel {
 
     var friends: [Friend] = []
 
-    func fetchFriends(completion: @escaping () -> Void) {
-        let urls = [
-            "https://dimanyen.github.io/friend1.json",
-            "https://dimanyen.github.io/friend2.json"
-        ]
+    func fetchFriends(urls: [String], completion: @escaping ([Friend]) -> Void) {
 
         var allFriends: [Friend] = []
         let dispatchGroup = DispatchGroup()
@@ -45,7 +41,7 @@ class FriendViewModel {
 
             self.friends = mergedFriends.sorted(by: { $0.fid < $1.fid })
             print("mergedFriends",self.friends)
-            completion()
+            completion(self.friends)
         }
     }
 }

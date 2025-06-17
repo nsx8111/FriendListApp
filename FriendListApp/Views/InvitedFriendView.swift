@@ -9,82 +9,186 @@ import Foundation
 import UIKit
 
 class InvitedFriendView: UIView {
-
-    private let backgroundView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(red: 245/255.0, green: 245/255.0, blue: 245/255.0, alpha: 1) // 偏灰色
-        view.layer.cornerRadius = 16.scalePt() // 依設計圖你圖看起來是大圓角
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-
-    private let searchIconImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "search_icon")) // 你要準備 search_icon 圖片
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-
+    // MARK: - UI Components
     private let searchTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "想轉一筆給誰呢？"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "想轉一筆給誰呢？",
+            attributes: [
+                .foregroundColor: UIColor(red: 142/255, green: 142/255, blue: 147/255, alpha: 1.0),
+                .font: UIFont.pingFangTC(.regular, size: 14.scalePt())
+            ]
+        )
+        
+        textField.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
+        textField.backgroundColor = UIColor(red: 142/255, green: 142/255, blue: 147/255, alpha: 0.12)
+        textField.layer.cornerRadius = 10.scalePt()
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 40.scalePt(), height: 36.scalePt()))
+        textField.leftViewMode = .always
         textField.font = .pingFangTC(.regular, size: 16.scalePt())
-        textField.textColor = UIColor(red: 71/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
-        textField.borderStyle = .none
-        textField.backgroundColor = .clear
-        textField.isUserInteractionEnabled = false // 如果你目前只是展示用，不需要真的打字可關閉
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.addTarget(self, action: #selector(searchTextChanged(_:)), for: .editingChanged)
         return textField
     }()
 
-    private let addFriendButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "ic_btn_add_friends"), for: .normal)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+    private let searchIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "magnifyingglass")
+//        imageView.image = UIImage(named: "ic_search")
+        imageView.tintColor = UIColor.systemGray3
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
+    
+    private let addFriendButton: UIButton = {
+        let addFriendButton = UIButton(type: .custom)
+        addFriendButton.setImage(UIImage(named: "ic_btn_add_friends"), for: .normal)
+        addFriendButton.translatesAutoresizingMaskIntoConstraints = false
+        return addFriendButton
+    }()
+    
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = UIColor.white
+        tableView.separatorStyle = .singleLine
+        tableView.separatorColor = UIColor.systemGray5
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 71.scalePt(), bottom: 0, right: 0) // 16 + 40 + 15 = 71
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
+    
+    private let refreshControl = UIRefreshControl()
+    private var allFriends: [Friend] = []      // 原始完整資料
+    private var filteredFriends: [Friend] = [] // 顯示用的資料
+    var onRequestRefresh: (() -> Void)?
 
+    // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
+        setupUI()
+        setupTableView()
     }
-
+    
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        setupUI()
+        setupTableView()
     }
-
-    private func setupView() {
-        addSubview(backgroundView)
+    
+    func updateFriendList(_ friends: [Friend]) {
+        allFriends = friends
+        filteredFriends = friends
+        tableView.reloadData()
+    }
+    
+    // MARK: - Setup Methods
+    private func setupUI() {
+        backgroundColor = UIColor.white
+        
+        addSubview(searchTextField)
+        addSubview(searchIcon)
         addSubview(addFriendButton)
+        addSubview(tableView)
+        
+        searchTextField.delegate = self
 
-        backgroundView.addSubview(searchIconImageView)
-        backgroundView.addSubview(searchTextField)
-
+        // Add tap gesture to dismiss keyboard
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        addGestureRecognizer(tapGesture)
+        
         NSLayoutConstraint.activate([
-            // backgroundView 左右貼齊 superview，右側預留 addFriendButton 的空間
-            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.scalePt()),
-            backgroundView.trailingAnchor.constraint(equalTo: addFriendButton.leadingAnchor, constant: -12.scalePt()),
-            backgroundView.topAnchor.constraint(equalTo: topAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            // addFriendButton 貼齊 superview 右側
-            addFriendButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12.scalePt()),
-            addFriendButton.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-            addFriendButton.widthAnchor.constraint(equalToConstant: 32.scalePt()), // 依你的圖大小設定
-            addFriendButton.heightAnchor.constraint(equalToConstant: 32.scalePt()),
-
-            // searchIconImageView
-            searchIconImageView.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: 12.scalePt()),
-            searchIconImageView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-            searchIconImageView.widthAnchor.constraint(equalToConstant: 20.scalePt()),
-            searchIconImageView.heightAnchor.constraint(equalToConstant: 20.scalePt()),
-
-            // searchTextField
-            searchTextField.leadingAnchor.constraint(equalTo: searchIconImageView.trailingAnchor, constant: 8.scalePt()),
-            searchTextField.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -12.scalePt()),
-            searchTextField.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-            searchTextField.heightAnchor.constraint(equalToConstant: 24.scalePt()) // 文字區高度
+            // Search TextField
+            searchTextField.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20.scalePt()),
+            searchTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
+            searchTextField.widthAnchor.constraint(equalToConstant: 276.scalePt()),
+            searchTextField.heightAnchor.constraint(equalToConstant: 36.scalePt()),
+            
+            // Add Friend Button
+            addFriendButton.leadingAnchor.constraint(equalTo: searchTextField.trailingAnchor, constant: 15.scalePt()),
+            addFriendButton.centerYAnchor.constraint(equalTo: searchTextField.centerYAnchor),
+            addFriendButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
+            addFriendButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
+            addFriendButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
+            
+            // Search Icon
+            searchIcon.leadingAnchor.constraint(equalTo: searchTextField.leadingAnchor, constant: 12.scalePt()),
+            searchIcon.centerYAnchor.constraint(equalTo: searchTextField.centerYAnchor),
+            searchIcon.widthAnchor.constraint(equalToConstant: 20.scalePt()),
+            searchIcon.heightAnchor.constraint(equalToConstant: 20.scalePt()),
+            
+            // Table View
+            tableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10.scalePt()),
+            tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.scalePt()),
+            tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.scalePt()),
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
+    
+    @objc private func dismissKeyboard() {
+        searchTextField.resignFirstResponder()
+    }
+    
+    private func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(FriendTableViewCell.self, forCellReuseIdentifier: "FriendCell")
+        
+        refreshControl.addTarget(self, action: #selector(refreshFriendList), for: .valueChanged)
+            tableView.refreshControl = refreshControl
+    }
+    
+    @objc private func refreshFriendList() {
+        onRequestRefresh?()
+    }
+    
+    func endRefreshing() {
+        refreshControl.endRefreshing()
+    }
 }
+
+// MARK: - UITableViewDataSource
+extension InvitedFriendView: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return filteredFriends.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendTableViewCell
+        let friend = filteredFriends[indexPath.row]
+        cell.configure(with: friend)
+        return cell
+    }}
+
+// MARK: - UITableViewDelegate
+extension InvitedFriendView: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 60.scalePt()
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let friend = filteredFriends[indexPath.row]
+        // Handle friend selection
+        print("Selected friend: \(friend.name)")
+    }
+}
+
+
+extension InvitedFriendView: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    @objc private func searchTextChanged(_ sender: UITextField) {
+        let keyword = sender.text?.lowercased() ?? ""
+        if keyword.isEmpty {
+            filteredFriends = allFriends
+        } else {
+            filteredFriends = allFriends.filter { $0.name.contains(keyword) }
+        }
+        tableView.reloadData()
+    }
+}
+

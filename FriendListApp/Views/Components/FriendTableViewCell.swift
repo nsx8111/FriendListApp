@@ -6,7 +6,6 @@
 //
 
 // MARK: - Custom Table View Cell
-// FriendTableViewCell.swift
 import UIKit
 
 class FriendTableViewCell: UITableViewCell {

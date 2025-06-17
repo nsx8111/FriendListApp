@@ -11,7 +11,6 @@ class NoInvitationsView: UIView {
     // MARK: - UI Components
     private let searchTextField: UITextField = {
         let textField = UITextField()
-//        textField.placeholder = "想轉一筆給誰呢？"
         textField.attributedPlaceholder = NSAttributedString(
             string: "想轉一筆給誰呢？",
             attributes: [
@@ -27,13 +26,30 @@ class NoInvitationsView: UIView {
         textField.leftViewMode = .always
         textField.font = .pingFangTC(.regular, size: 16.scalePt())
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.addTarget(self, action: #selector(searchTextChanged(_:)), for: .editingChanged)
+
+        // 建立 clearButton
+        let clearButton = UIButton(type: .custom)
+        clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        clearButton.tintColor = .lightGray
+        clearButton.frame = CGRect(x: 0, y: 0, width: 20.scalePt(), height: 20.scalePt())
+        clearButton.addTarget(nil, action: #selector(clearSearchText), for: .touchUpInside)
+
+        // 包裝成 containerView，加上右側 10pt 空間
+        let containerView = UIView(frame: CGRect(x: 0, y: 0, width: 30.scalePt(), height: 36.scalePt()))
+        clearButton.center = CGPoint(x: 10.scalePt(), y: containerView.frame.height / 2)
+        containerView.addSubview(clearButton)
+
+        textField.rightView = containerView
+        textField.rightViewMode = .whileEditing
+
         return textField
     }()
-
+    
     private let searchIcon: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "magnifyingglass")
-//        imageView.image = UIImage(named: "ic_search")
+        //        imageView.image = UIImage(named: "ic_search")
         imageView.tintColor = UIColor.systemGray3
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -56,16 +72,16 @@ class NoInvitationsView: UIView {
         return tableView
     }()
     
-    private let viewModel = FriendViewModel()
-
+    private let refreshControl = UIRefreshControl()
+    private var allFriends: [Friend] = []      // 原始完整資料
+    private var filteredFriends: [Friend] = [] // 顯示用的資料
+    var onRequestRefresh: (() -> Void)?
+    
     // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
         setupTableView()
-        viewModel.fetchFriends {
-            self.tableView.reloadData()
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -84,7 +100,7 @@ class NoInvitationsView: UIView {
         addSubview(tableView)
         
         searchTextField.delegate = self
-
+        
         // Add tap gesture to dismiss keyboard
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -118,26 +134,49 @@ class NoInvitationsView: UIView {
         ])
     }
     
-    @objc private func dismissKeyboard() {
-        searchTextField.resignFirstResponder()
-    }
-    
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(FriendTableViewCell.self, forCellReuseIdentifier: "FriendCell")
+        
+        refreshControl.addTarget(self, action: #selector(refreshFriendList), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+    }
+    
+    func updateFriendList(_ friends: [Friend]) {
+        allFriends = friends
+        filteredFriends = friends
+        tableView.reloadData()
+    }
+    
+    @objc private func clearSearchText() {
+        searchTextField.text = ""
+        filteredFriends = allFriends
+        tableView.reloadData()
+    }
+    
+    @objc private func dismissKeyboard() {
+        searchTextField.resignFirstResponder()
+    }
+    
+    @objc private func refreshFriendList() {
+        onRequestRefresh?()
+    }
+    
+    func endRefreshing() {
+        refreshControl.endRefreshing()
     }
 }
 
 // MARK: - UITableViewDataSource
 extension NoInvitationsView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.friends.count
+        return filteredFriends.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendTableViewCell
-        let friend = viewModel.friends[indexPath.row]
+        let friend = filteredFriends[indexPath.row]
         cell.configure(with: friend)
         return cell
     }}
@@ -150,7 +189,7 @@ extension NoInvitationsView: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let friend = viewModel.friends[indexPath.row]
+        let friend = filteredFriends[indexPath.row]
         // Handle friend selection
         print("Selected friend: \(friend.name)")
     }
@@ -161,5 +200,15 @@ extension NoInvitationsView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+    
+    @objc private func searchTextChanged(_ sender: UITextField) {
+        let keyword = sender.text?.lowercased() ?? ""
+        if keyword.isEmpty {
+            filteredFriends = allFriends
+        } else {
+            filteredFriends = allFriends.filter { $0.name.contains(keyword) }
+        }
+        tableView.reloadData()
     }
 }

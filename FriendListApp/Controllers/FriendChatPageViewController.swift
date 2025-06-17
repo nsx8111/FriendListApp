@@ -27,7 +27,7 @@ class FriendChatPageViewController: UIViewController {
         setupLayout()
         setupPageViewController()
         if let friendVC = pages[0] as? FriendViewController {
-            friendVC.updateFriendView(contentType: contentType)
+            friendVC.setupView(for: contentType)
         }
     }
 
