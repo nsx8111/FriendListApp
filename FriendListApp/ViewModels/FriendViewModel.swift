@@ -44,4 +44,33 @@ class FriendViewModel {
             completion(self.friends)
         }
     }
+    
+    
+    func fetchUsers(completion: @escaping ([User]) -> Void) {
+        guard let url = URL(string: "https://dimanyen.github.io/man.json") else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("❌ 請求失敗：", error)
+                completion([])
+                return
+            }
+            
+            guard let data = data else {
+                print("❌ 沒有取得資料")
+                completion([])
+                return
+            }
+            
+            do {
+                let decoded = try JSONDecoder().decode(UserResponse.self, from: data)
+                DispatchQueue.main.async {
+                    completion(decoded.response)
+                }
+            } catch {
+                print("❌ 解碼錯誤：", error)
+                completion([])
+            }
+        }.resume()
+    }
 }

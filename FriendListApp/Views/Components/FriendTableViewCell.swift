@@ -130,7 +130,7 @@ class FriendTableViewCell: UITableViewCell {
         contentView.addSubview(transferButton)
         var constraints: [NSLayoutConstraint] = []
 
-        if friend.status == 2 {
+        if friend.status == 0 {
             invitingButton.isHidden = false
             moreButton.isHidden = true
             contentView.addSubview(invitingButton)

@@ -9,6 +9,8 @@ import Foundation
 import UIKit
 
 class FriendChatPageViewController: UIViewController {
+    
+    private let viewModel = FriendViewModel()
 
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let navigationBar = NavigationBarView()
@@ -22,9 +24,29 @@ class FriendChatPageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-
+        
         setupLayout()
         setupPageViewController()
+        getUserData()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+        navigationController?.navigationBar.addGestureRecognizer(tapGesture)
+    }
+    
+    func getUserData() -> Void {
+        viewModel.fetchUsers { users in
+            if let user = users.first {
+                print("使用者名稱：\(user.name)，KOKO ID：\(user.kokoid)")
+                self.navigationBar.userName = user.name
+                self.navigationBar.kokoID = user.kokoid
+            }
+        }
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     private func setupLayout() {

@@ -31,3 +31,14 @@ struct Friend: Codable {
 struct FriendResponse: Codable {
     let response: [Friend]
 }
+
+
+
+struct UserResponse: Decodable {
+    let response: [User]
+}
+
+struct User: Decodable {
+    let name: String
+    let kokoid: String
+}

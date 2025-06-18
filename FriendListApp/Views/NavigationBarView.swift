@@ -19,6 +19,18 @@ class NavigationBarView: UIView {
         line.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
         return line
     }()
+    
+    var userName: String = "紫琳" {
+        didSet {
+            nameLabel.text = userName
+        }
+    }
+    
+    var kokoID: String = "" {
+        didSet {
+            setIdLabel.text = "設定 KOKO ID：\(kokoID) >"
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,13 +55,13 @@ class NavigationBarView: UIView {
         avatarView.layer.cornerRadius = 52.scalePt() / 2
 
         // 文字設定
-        nameLabel.text = "紫琳"
-        nameLabel.font = .pingFangTC(size: 16.scalePt())
-        nameLabel.textColor = .black
+        nameLabel.text = userName
+        nameLabel.font = .pingFangTC(.medium, size: 17.scalePt())
+        nameLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
 
-        setIdLabel.text = "設定 KOKO ID >"
-        setIdLabel.font = .pingFangTC(size: 12.scalePt())
-        setIdLabel.textColor = .gray
+        setIdLabel.text = "設定 KOKO ID：\(kokoID) >"
+        setIdLabel.font = .pingFangTC(.regular, size: 13.scalePt())
+        setIdLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
 
         // Tab 按鈕設定
         friendTabButton.setTitle("好友", for: .normal)
@@ -86,11 +98,18 @@ class NavigationBarView: UIView {
             transferButton.centerYAnchor.constraint(equalTo: qrButton.centerYAnchor, constant: 0.scalePt()),
             transferButton.leadingAnchor.constraint(equalTo: atmButton.trailingAnchor, constant: 24.scalePt()),
             
+            qrButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
+            qrButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
+            atmButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
+            atmButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
+            transferButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
+            transferButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
+            
             // Avatar
             avatarView.topAnchor.constraint(equalTo: qrButton.bottomAnchor, constant: 27.scalePt()),
             avatarView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
             avatarView.widthAnchor.constraint(equalToConstant: 52.scalePt()),
-            avatarView.heightAnchor.constraint(equalToConstant: 54.scalePt()),
+            avatarView.heightAnchor.constraint(equalToConstant: 52.scalePt()),
 
             // NameLabel
             nameLabel.topAnchor.constraint(equalTo: atmButton.bottomAnchor, constant: 35.scalePt()),
@@ -105,7 +124,7 @@ class NavigationBarView: UIView {
             friendTabButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32.scalePt()),
             
             // Chat Tab Button
-            chatTabButton.topAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 12.scalePt()),
+            chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor, constant: 0.scalePt()),
             chatTabButton.leadingAnchor.constraint(equalTo: friendTabButton.trailingAnchor, constant: 36.scalePt()),
             
             indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 4.scalePt()),

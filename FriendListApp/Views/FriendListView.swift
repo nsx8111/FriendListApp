@@ -103,13 +103,15 @@ class FriendListView: UIView {
 
     private let addButton: UIButton = {
         let button = UIButton(type: .custom)
+        // 文字
         button.setTitle("加好友", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pingFangTC(.medium, size: 16.scalePt())
         button.layer.cornerRadius = 20.scalePt()
         button.clipsToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
-
+        
+        // Gradient 背景
         let gradientLayer = CAGradientLayer()
         gradientLayer.colors = [
             UIColor(red: 86/255, green: 179/255, blue: 11/255, alpha: 1).cgColor,
@@ -120,8 +122,23 @@ class FriendListView: UIView {
         gradientLayer.cornerRadius = 20.scalePt()
         gradientLayer.frame = CGRect(x: 0, y: 0, width: 192.scalePt(), height: 40.scalePt())
         button.layer.insertSublayer(gradientLayer, at: 0)
+
+        // 加入 Icon
+        let iconImageView = UIImageView(image: UIImage(named: "add_friend_icon"))
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        iconImageView.contentMode = .scaleAspectFit
+        button.addSubview(iconImageView)
+
+        NSLayoutConstraint.activate([
+            iconImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+            iconImageView.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -8.scalePt()),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24.scalePt()),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24.scalePt())
+        ])
+        
         return button
     }()
+
 
     private let helpContainerView = UIView()
 
@@ -182,6 +199,7 @@ class FriendListView: UIView {
         helpContainerView.translatesAutoresizingMaskIntoConstraints = false
         helpLabel.translatesAutoresizingMaskIntoConstraints = false
         setKokoIdLabel.translatesAutoresizingMaskIntoConstraints = false
+        searchTextField.delegate = self
 
         NSLayoutConstraint.activate([
             // 搜尋列
@@ -309,5 +327,13 @@ extension FriendListView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         print("Selected friend: \(filteredFriends[indexPath.row].name)")
+    }
+}
+
+
+extension FriendListView: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
