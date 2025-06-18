@@ -256,29 +256,28 @@ class FriendListView: UIView {
     func endRefreshing() {
         refreshControl.endRefreshing()
     }
-
+    
     // MARK: - UI Updates
     private func updateVisibility() {
         let hasData = !filteredFriends.isEmpty
         searchTextField.isHidden = !hasData
         searchIcon.isHidden = !hasData
         addFriendButton.isHidden = !hasData
-        tableView.isHidden = !hasData
-
+        tableView.isHidden = false
         imageView.isHidden = hasData
         titleLabel.isHidden = hasData
         descLabel.isHidden = hasData
         addButton.isHidden = hasData
         helpContainerView.isHidden = hasData
     }
-
+    
     // MARK: - Actions
     @objc private func searchTextChanged(_ sender: UITextField) {
         let keyword = sender.text?.lowercased() ?? ""
         filteredFriends = keyword.isEmpty ? allFriends : allFriends.filter { $0.name.contains(keyword) }
         tableView.reloadData()
     }
-
+    
     @objc private func clearSearchText() {
         searchTextField.text = ""
         searchTextChanged(searchTextField)

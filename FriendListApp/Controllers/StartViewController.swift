@@ -22,7 +22,7 @@ class StartViewController: UIViewController {
         
         let stackView = UIStackView(arrangedSubviews: [noFriendButton, noInvitationsButton, invitedFriendButton])
         stackView.axis = .vertical
-        stackView.spacing = 60
+        stackView.spacing = 80
         stackView.alignment = .center
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
