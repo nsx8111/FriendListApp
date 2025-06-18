@@ -28,6 +28,7 @@ class FriendChatPageViewController: UIViewController {
         setupLayout()
         setupPageViewController()
         getUserData()
+        getInvitesData()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -41,6 +42,14 @@ class FriendChatPageViewController: UIViewController {
                 print("使用者名稱：\(user.name)，KOKO ID：\(user.kokoid)")
                 self.navigationBar.userName = user.name
                 self.navigationBar.kokoID = user.kokoid
+            }
+        }
+    }
+    
+    func getInvitesData() -> Void {
+        viewModel.fetchFriends(urls: [apiDatasource4]) { [weak self] friends in
+            DispatchQueue.main.async {
+                self?.navigationBar.updateInvitesList(friends)
             }
         }
     }
@@ -74,10 +83,8 @@ class FriendChatPageViewController: UIViewController {
     private func setupPageViewController() {
         addChild(pageViewController)
         pageViewController.didMove(toParent: self)
-
         pageViewController.dataSource = self
         pageViewController.delegate = self
-
         pageViewController.setViewControllers([pages[0]], direction: .forward, animated: false)
     }
 

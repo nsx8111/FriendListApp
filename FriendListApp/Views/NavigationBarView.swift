@@ -7,7 +7,6 @@ class NavigationBarView: UIView {
     let friendTabButton = UIButton()
     let chatTabButton = UIButton()
     private let indicatorView = UIView()
-
     private let atmButton = UIButton()
     private let transferButton = UIButton()
     private let qrButton = UIButton()
@@ -19,6 +18,21 @@ class NavigationBarView: UIView {
         line.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
         return line
     }()
+    private let inviteTableView: UITableView = {
+        let tv = UITableView()
+        tv.isScrollEnabled = false
+        tv.separatorStyle = .none
+        tv.backgroundColor = .clear
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
+    }()
+    
+    private var allInvitesFriends: [Friend] = [] {
+        didSet {
+            inviteTableView.reloadData()
+            inviteTableView.isHidden = allInvitesFriends.isEmpty
+        }
+    }
     
     var userName: String = "紫琳" {
         didSet {
@@ -31,16 +45,16 @@ class NavigationBarView: UIView {
             setIdLabel.text = "設定 KOKO ID：\(kokoID) >"
         }
     }
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setup() {
         backgroundColor = UIColor(red: 252/255.0, green: 252/255.0, blue: 252/255.0, alpha: 1)
 
@@ -68,8 +82,8 @@ class NavigationBarView: UIView {
         chatTabButton.setTitle("聊天", for: .normal)
 
         [friendTabButton, chatTabButton].forEach {
-            $0.setTitleColor(.darkGray, for: .normal)
-            $0.titleLabel?.font = .pingFangTC(size: 16.scalePt())
+            $0.setTitleColor(UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0), for: .normal)
+            $0.titleLabel?.font = .pingFangTC(.medium, size: 13.scalePt())
         }
         friendTabButton.setTitleColor(.systemPink, for: .normal)
 
@@ -77,12 +91,16 @@ class NavigationBarView: UIView {
         indicatorView.layer.cornerRadius = 2.scalePt()
 
         // 加入 subviews
-        [atmButton, transferButton, qrButton, avatarView, nameLabel, setIdLabel, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
+        [atmButton, transferButton, qrButton, avatarView, nameLabel, setIdLabel, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
         indicatorCenterXConstraint = indicatorView.centerXAnchor.constraint(equalTo: friendTabButton.centerXAnchor)
+        
+        inviteTableView.delegate = self
+        inviteTableView.dataSource = self
+        inviteTableView.register(InviteListCell.self, forCellReuseIdentifier: "InviteCell")
 
         // 設定 constraint
         NSLayoutConstraint.activate([
@@ -118,6 +136,11 @@ class NavigationBarView: UIView {
             // SetIdLabel
             setIdLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8.scalePt()),
             setIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
+            
+            inviteTableView.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 20.scalePt()),
+            inviteTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.scalePt()),
+            inviteTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.scalePt()),
+            inviteTableView.heightAnchor.constraint(equalToConstant: 140.scalePt()), // 可根據邀請數改動高度
 
             // Friend Tab Button
             friendTabButton.topAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 12.scalePt()),
@@ -158,5 +181,29 @@ class NavigationBarView: UIView {
         UIView.animate(withDuration: 0.1) {
             self.layoutIfNeeded()
         }
+    }
+    
+    func updateInvitesList(_ friends: [Friend]) {
+        allInvitesFriends = friends.filter { $0.status == 2 }
+    }
+}
+
+
+
+extension NavigationBarView: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return allInvitesFriends.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "InviteCell", for: indexPath) as? InviteListCell else {
+            return UITableViewCell()
+        }
+        cell.configure(with: allInvitesFriends[indexPath.row])
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70.scalePt()
     }
 }

@@ -47,7 +47,7 @@ class FriendViewModel {
     
     
     func fetchUsers(completion: @escaping ([User]) -> Void) {
-        guard let url = URL(string: "https://dimanyen.github.io/man.json") else { return }
+        guard let url = URL(string: apiDatasource1) else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {

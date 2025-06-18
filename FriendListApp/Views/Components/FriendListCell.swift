@@ -1,5 +1,5 @@
 //
-//  FriendTableViewCell.swift
+//  FriendListCell.swift
 //  FriendListApp
 //
 //  Created by 洋洋 on 2025/6/17.
@@ -8,7 +8,7 @@
 // MARK: - Custom Table View Cell
 import UIKit
 
-class FriendTableViewCell: UITableViewCell {
+class FriendListCell: UITableViewCell {
 
     private let avatarImageView: UIImageView = {
         let imageView = UIImageView()

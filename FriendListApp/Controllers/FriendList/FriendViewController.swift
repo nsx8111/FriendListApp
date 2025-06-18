@@ -36,11 +36,11 @@ class FriendViewController: UIViewController {
         
         switch type {
         case .noFriend:
-            urls = ["https://dimanyen.github.io/friend4.json"]
+            urls = [apiDatasource5]
         case .noInvitations:
-            urls = ["https://dimanyen.github.io/friend1.json", "https://dimanyen.github.io/friend2.json"]
+            urls = [apiDatasource2, apiDatasource3]
         case .invitedFriend:
-            urls = ["https://dimanyen.github.io/friend3.json"]
+            urls = [apiDatasource4]
         }
         
         view.addSubview(friendListView)

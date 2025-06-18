@@ -258,7 +258,7 @@ class FriendListView: UIView {
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(FriendTableViewCell.self, forCellReuseIdentifier: "FriendCell")
+        tableView.register(FriendListCell.self, forCellReuseIdentifier: "FriendCell")
         refreshControl.addTarget(self, action: #selector(refreshFriendList), for: .valueChanged)
         tableView.refreshControl = refreshControl
     }
@@ -315,7 +315,7 @@ extension FriendListView: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendListCell
         cell.configure(with: filteredFriends[indexPath.row])
         return cell
     }
