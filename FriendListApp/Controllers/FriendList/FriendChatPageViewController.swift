@@ -15,6 +15,9 @@ class FriendChatPageViewController: UIViewController {
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let navigationBar = NavigationBarView()
 
+    // 添加navigationBar高度約束的變數
+    private var navigationBarHeightConstraint: NSLayoutConstraint!
+
     private lazy var pages: [UIViewController] = {
         return [FriendViewController(), ChatViewController()]
     }()
@@ -28,7 +31,10 @@ class FriendChatPageViewController: UIViewController {
         setupLayout()
         setupPageViewController()
         getUserData()
-        getInvitesData()
+        
+        if MainContentManager.shared.currentType == .invitedFriend {
+            getInvitesData()
+        }
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -49,8 +55,20 @@ class FriendChatPageViewController: UIViewController {
     func getInvitesData() -> Void {
         viewModel.fetchFriends(urls: [apiDatasource4]) { [weak self] friends in
             DispatchQueue.main.async {
-                self?.navigationBar.updateInvitesList(friends)
+                self?.navigationBar.updateInvitesList(friends) { [weak self] newHeight in
+                    // 動態更新NavigationBar高度
+                    self?.updateNavigationBarHeight(newHeight)
+                }
             }
+        }
+    }
+    
+    // 新增方法：更新NavigationBar高度
+    private func updateNavigationBarHeight(_ newHeight: CGFloat) {
+        navigationBarHeightConstraint.constant = newHeight
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
         }
     }
     
@@ -64,11 +82,14 @@ class FriendChatPageViewController: UIViewController {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
+        // 使用變數儲存高度約束
+        navigationBarHeightConstraint = navigationBar.heightAnchor.constraint(equalToConstant: 192.scalePt())
+
         NSLayoutConstraint.activate([
             navigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             navigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             navigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            navigationBar.heightAnchor.constraint(equalToConstant: 192),
+            navigationBarHeightConstraint,
  
             pageViewController.view.topAnchor.constraint(equalTo: navigationBar.bottomAnchor),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -79,15 +100,25 @@ class FriendChatPageViewController: UIViewController {
         navigationBar.friendTabButton.addTarget(self, action: #selector(showFriendPage), for: .touchUpInside)
         navigationBar.chatTabButton.addTarget(self, action: #selector(showChatPage), for: .touchUpInside)
     }
-
+    
     private func setupPageViewController() {
         addChild(pageViewController)
         pageViewController.didMove(toParent: self)
         pageViewController.dataSource = self
         pageViewController.delegate = self
         pageViewController.setViewControllers([pages[0]], direction: .forward, animated: false)
+        
+        // 設置 FriendViewController 的 onRequestRefresh 回調
+        if let friendViewController = pages[0] as? FriendViewController {
+            friendViewController.onRequestRefresh = { [weak self] type in
+                // 當 type 為 invitedFriend 時執行 getInvitesData
+                if type == .invitedFriend {
+                    self?.getInvitesData()
+                }
+            }
+        }
     }
-
+    
     @objc private func showFriendPage() {
         if currentIndex != 0 {
             pageViewController.setViewControllers([pages[0]], direction: .reverse, animated: true)
@@ -95,7 +126,7 @@ class FriendChatPageViewController: UIViewController {
             navigationBar.setSelectedTab(index: currentIndex)
         }
     }
-
+    
     @objc private func showChatPage() {
         if currentIndex != 1 {
             pageViewController.setViewControllers([pages[1]], direction: .forward, animated: true)

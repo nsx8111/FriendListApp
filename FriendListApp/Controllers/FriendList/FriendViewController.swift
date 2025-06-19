@@ -15,6 +15,8 @@ class FriendViewController: UIViewController {
     var currentType: MainContentType {
         return MainContentManager.shared.currentType
     }
+    // 添加回調屬性，供 FriendChatPageViewController 監聽
+    var onRequestRefresh: ((MainContentType) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +26,7 @@ class FriendViewController: UIViewController {
         
         friendListView.onRequestRefresh = { [weak self] type in
             self?.setupView(for: type)
+            self?.onRequestRefresh?(type)
         }
     }
     

@@ -265,8 +265,8 @@ class FriendListView: UIView {
 
     // MARK: - Public Methods
     func updateFriendList(_ friends: [Friend]) {
-        allFriends = friends
-        filteredFriends = friends
+        allFriends = friends.filter { $0.status == 0 || $0.status == 1 }
+        filteredFriends = friends.filter { $0.status == 0 || $0.status == 1 }
         tableView.reloadData()
         updateVisibility()
     }

@@ -2,8 +2,11 @@
 import UIKit
 
 class NavigationBarView: UIView {
+    private var friendTabTopConstraintToInviteTableView: NSLayoutConstraint!
+    private var friendTabTopConstraintToSetIdLabel: NSLayoutConstraint!
+    private var inviteTableViewHeightConstraint: NSLayoutConstraint!
     private var indicatorCenterXConstraint: NSLayoutConstraint!
-
+    
     let friendTabButton = UIButton()
     let chatTabButton = UIButton()
     private let indicatorView = UIView()
@@ -30,7 +33,7 @@ class NavigationBarView: UIView {
     private var allInvitesFriends: [Friend] = [] {
         didSet {
             inviteTableView.reloadData()
-            inviteTableView.isHidden = allInvitesFriends.isEmpty
+            updateTableViewHeight()
         }
     }
     
@@ -42,7 +45,7 @@ class NavigationBarView: UIView {
     
     var kokoID: String = "" {
         didSet {
-            setIdLabel.text = "設定 KOKO ID：\(kokoID) >"
+            setIdLabel.text = "KOKO ID：\(kokoID) >"
         }
     }
     
@@ -73,7 +76,7 @@ class NavigationBarView: UIView {
         nameLabel.font = .pingFangTC(.medium, size: 17.scalePt())
         nameLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
 
-        setIdLabel.text = "設定 KOKO ID：\(kokoID) >"
+        setIdLabel.text = "KOKO ID：\(kokoID) >"
         setIdLabel.font = .pingFangTC(.regular, size: 13.scalePt())
         setIdLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
 
@@ -96,11 +99,22 @@ class NavigationBarView: UIView {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
+        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 12.scalePt())
+        friendTabTopConstraintToSetIdLabel = friendTabButton.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 30.scalePt())
+        
         indicatorCenterXConstraint = indicatorView.centerXAnchor.constraint(equalTo: friendTabButton.centerXAnchor)
+        inviteTableViewHeightConstraint = inviteTableView.heightAnchor.constraint(equalToConstant: 0)
         
         inviteTableView.delegate = self
         inviteTableView.dataSource = self
         inviteTableView.register(InviteListCell.self, forCellReuseIdentifier: "InviteCell")
+        
+        inviteTableView.layer.cornerRadius = 6.scalePt()
+        inviteTableView.layer.shadowRadius = 8.scalePt()
+        inviteTableView.layer.shadowOpacity = 0.1
+        inviteTableView.layer.shadowColor = UIColor.black.cgColor
+        inviteTableView.layer.shadowOffset = .zero // 所有方向都有陰影
+        inviteTableView.layer.masksToBounds = false
 
         // 設定 constraint
         NSLayoutConstraint.activate([
@@ -137,30 +151,58 @@ class NavigationBarView: UIView {
             setIdLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8.scalePt()),
             setIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
             
-            inviteTableView.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 20.scalePt()),
-            inviteTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.scalePt()),
-            inviteTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.scalePt()),
-            inviteTableView.heightAnchor.constraint(equalToConstant: 140.scalePt()), // 可根據邀請數改動高度
+            // InviteTableView - 根據UI設計調整間距
+            inviteTableView.topAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 35.scalePt()),
+            inviteTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
+            inviteTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
+            inviteTableViewHeightConstraint,
 
-            // Friend Tab Button
-            friendTabButton.topAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 12.scalePt()),
             friendTabButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32.scalePt()),
+            friendTabTopConstraintToSetIdLabel,
             
             // Chat Tab Button
             chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor, constant: 0.scalePt()),
             chatTabButton.leadingAnchor.constraint(equalTo: friendTabButton.trailingAnchor, constant: 36.scalePt()),
             
             indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 4.scalePt()),
-            indicatorCenterXConstraint, // 用 centerXAnchor 跟 friendTabButton 綁定
+            indicatorCenterXConstraint,
             indicatorView.widthAnchor.constraint(equalToConstant: 20.scalePt()),
             indicatorView.heightAnchor.constraint(equalToConstant: 4.scalePt()),
-            indicatorView.bottomAnchor.constraint(equalTo: bottomAnchor), // 保證包住
+            indicatorView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
             bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor),
             bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor),
             bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor),
             bottomLine.heightAnchor.constraint(equalToConstant: 2 / UIScreen.main.scale)
         ])
+    }
+    
+    private func updateTableViewHeight() {
+        let inviteCount = allInvitesFriends.count
+        if inviteCount == 0 {
+            inviteTableViewHeightConstraint.constant = 0
+            inviteTableView.isHidden = true
+        } else {
+            // 每個cell高度70pt + 間距10pt，但最後一個cell沒有間距
+            let totalHeight = CGFloat(inviteCount) * 70.scalePt() + CGFloat(max(0, inviteCount - 0)) * 10.scalePt()
+            inviteTableViewHeightConstraint.constant = totalHeight
+            inviteTableView.isHidden = false
+        }
+        friendTabTopConstraintToInviteTableView.isActive = !inviteTableView.isHidden
+        friendTabTopConstraintToSetIdLabel.isActive = inviteTableView.isHidden
+    }
+    
+    private func calculateTotalHeight() -> CGFloat {
+        let baseHeight: CGFloat = 192.scalePt() // 原始高度
+        let inviteCount = allInvitesFriends.count
+        
+        if inviteCount == 0 {
+            return baseHeight
+        } else {
+            // 每個cell高度70pt + 間距10pt，但最後一個cell沒有間距
+            let tableViewHeight = CGFloat(inviteCount) * 70.scalePt() + CGFloat(max(0, inviteCount - 0)) * 10.scalePt()
+            return baseHeight + tableViewHeight
+        }
     }
     
     func setSelectedTab(index: Int) {
@@ -183,12 +225,14 @@ class NavigationBarView: UIView {
         }
     }
     
-    func updateInvitesList(_ friends: [Friend]) {
+    func updateInvitesList(_ friends: [Friend], completion: @escaping (CGFloat) -> Void) {
         allInvitesFriends = friends.filter { $0.status == 2 }
+        
+        // 計算新的總高度並通過completion回調
+        let newHeight = calculateTotalHeight()
+        completion(newHeight)
     }
 }
-
-
 
 extension NavigationBarView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -204,6 +248,14 @@ extension NavigationBarView: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70.scalePt()
+        return 80.scalePt()
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        return UIView()
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0.01
     }
 }
