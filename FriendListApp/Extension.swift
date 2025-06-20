@@ -27,6 +27,11 @@ extension CGFloat {
         let scaleFactor = UIScreen.main.bounds.width / baseWidth
         return self * scaleFactor
     }
+    
+    func scalePtHeight(baseHeight: CGFloat = 844.0) -> CGFloat {
+        let scaleFactor = UIScreen.main.bounds.height / baseHeight
+        return self * scaleFactor
+    }
 }
 
 extension Int {

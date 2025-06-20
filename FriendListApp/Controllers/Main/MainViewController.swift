@@ -22,12 +22,19 @@ class MainViewController: UIViewController {
             SettingViewController()
         ]
     }()
-
+    
     private var currentIndex = 0
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.windows.first {
+            let statusBarHeight = window.safeAreaInsets.top
+            print("狀態列高度: \(statusBarHeight)")
+        }
         
         setupLayout()
         setupPageViewController()

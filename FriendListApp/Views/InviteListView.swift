@@ -1,7 +1,6 @@
-
 import UIKit
 
-class NavigationBarView: UIView {
+class InviteListView: UIView {
     private var friendTabTopConstraintToInviteTableView: NSLayoutConstraint!
     private var friendTabTopConstraintToSetIdLabel: NSLayoutConstraint!
     private var inviteTableViewHeightConstraint: NSLayoutConstraint!
@@ -30,12 +29,19 @@ class NavigationBarView: UIView {
         return tv
     }()
     
-    private var allInvitesFriends: [Friend] = [] {
-        didSet {
-            inviteTableView.reloadData()
-            updateTableViewHeight()
-        }
-    }
+    // 添加堆疊效果的背景層
+    private let stackedBackgroundView1 = UIView()
+    private let stackedBackgroundView2 = UIView()
+    
+    // 控制展開狀態的變數
+    private var isInviteListExpanded = false
+    private let collapsedDisplayCount = 1 // 縮合時只顯示1個邀請
+    
+    // 修改：移除 didSet，改為手動控制更新
+    private var allInvitesFriends: [Friend] = []
+    
+    // 高度變化回調
+    var heightDidChange: ((CGFloat) -> Void)?
     
     var userName: String = "紫琳" {
         didSet {
@@ -93,13 +99,26 @@ class NavigationBarView: UIView {
         indicatorView.backgroundColor = .systemPink
         indicatorView.layer.cornerRadius = 2.scalePt()
 
-        // 加入 subviews
-        [atmButton, transferButton, qrButton, avatarView, nameLabel, setIdLabel, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
+        // 設置堆疊背景層的樣式
+        [stackedBackgroundView1, stackedBackgroundView2].forEach { view in
+            view.backgroundColor = UIColor(red: 252/255.0, green: 252/255.0, blue: 252/255.0, alpha: 1)
+            view.layer.cornerRadius = 6.scalePt()
+            view.layer.shadowRadius = 8.scalePt()
+            view.layer.shadowOpacity = 0.1
+            view.layer.shadowColor = UIColor.black.cgColor
+            view.layer.shadowOffset = .zero
+            view.layer.masksToBounds = false
+            view.translatesAutoresizingMaskIntoConstraints = false
+            view.isHidden = true // 初始隱藏
+        }
+
+        // 加入 subviews - 注意順序，背景層要在 tableView 之前
+        [atmButton, transferButton, qrButton, avatarView, nameLabel, setIdLabel, stackedBackgroundView2, stackedBackgroundView1, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 12.scalePt())
+        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: stackedBackgroundView1.bottomAnchor, constant: 22.scalePt())
         friendTabTopConstraintToSetIdLabel = friendTabButton.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 30.scalePt())
         
         indicatorCenterXConstraint = indicatorView.centerXAnchor.constraint(equalTo: friendTabButton.centerXAnchor)
@@ -108,12 +127,11 @@ class NavigationBarView: UIView {
         inviteTableView.delegate = self
         inviteTableView.dataSource = self
         inviteTableView.register(InviteListCell.self, forCellReuseIdentifier: "InviteCell")
-        
         inviteTableView.layer.cornerRadius = 6.scalePt()
         inviteTableView.layer.shadowRadius = 8.scalePt()
         inviteTableView.layer.shadowOpacity = 0.1
         inviteTableView.layer.shadowColor = UIColor.black.cgColor
-        inviteTableView.layer.shadowOffset = .zero // 所有方向都有陰影
+        inviteTableView.layer.shadowOffset = .zero
         inviteTableView.layer.masksToBounds = false
 
         // 設定 constraint
@@ -156,6 +174,17 @@ class NavigationBarView: UIView {
             inviteTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
             inviteTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
             inviteTableViewHeightConstraint,
+            
+            // 堆疊背景層約束
+            stackedBackgroundView1.topAnchor.constraint(equalTo: inviteTableView.topAnchor, constant: 5.scalePt()),
+            stackedBackgroundView1.leadingAnchor.constraint(equalTo: inviteTableView.leadingAnchor, constant: 10.scalePt()),
+            stackedBackgroundView1.trailingAnchor.constraint(equalTo: inviteTableView.trailingAnchor, constant: -10.scalePt()),
+            stackedBackgroundView1.bottomAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 10.scalePt()),
+            
+            stackedBackgroundView2.topAnchor.constraint(equalTo: inviteTableView.topAnchor, constant: 10.scalePt()),
+            stackedBackgroundView2.leadingAnchor.constraint(equalTo: inviteTableView.leadingAnchor, constant: 10.scalePt()),
+            stackedBackgroundView2.trailingAnchor.constraint(equalTo: inviteTableView.trailingAnchor, constant: -10.scalePt()),
+            stackedBackgroundView2.bottomAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 10.scalePt()),
 
             friendTabButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32.scalePt()),
             friendTabTopConstraintToSetIdLabel,
@@ -182,27 +211,89 @@ class NavigationBarView: UIView {
         if inviteCount == 0 {
             inviteTableViewHeightConstraint.constant = 0
             inviteTableView.isHidden = true
+            // 隱藏堆疊背景層
+            stackedBackgroundView1.isHidden = true
+            stackedBackgroundView2.isHidden = true
         } else {
-            // 每個cell高度70pt + 間距10pt，但最後一個cell沒有間距
-            let totalHeight = CGFloat(inviteCount) * 70.scalePt() + CGFloat(max(0, inviteCount - 0)) * 10.scalePt()
+            let displayCount = getDisplayCount()
+            let totalHeight = CGFloat(displayCount) * 70.scalePt() + CGFloat(max(0, displayCount - 1)) * 10.scalePt()
             inviteTableViewHeightConstraint.constant = totalHeight
             inviteTableView.isHidden = false
+            
+            // 控制堆疊背景層的顯示
+            let shouldShowStackedEffect = !isInviteListExpanded && inviteCount > collapsedDisplayCount
+            stackedBackgroundView1.isHidden = !shouldShowStackedEffect
+            stackedBackgroundView2.isHidden = !shouldShowStackedEffect || inviteCount <= 2
         }
-        friendTabTopConstraintToInviteTableView.isActive = !inviteTableView.isHidden
-        friendTabTopConstraintToSetIdLabel.isActive = inviteTableView.isHidden
+        
+        // 根據是否顯示堆疊效果來選擇約束
+        if !stackedBackgroundView1.isHidden {
+            friendTabTopConstraintToInviteTableView.isActive = true
+            friendTabTopConstraintToSetIdLabel.isActive = false
+        } else {
+            friendTabTopConstraintToInviteTableView.isActive = !inviteTableView.isHidden
+            friendTabTopConstraintToSetIdLabel.isActive = inviteTableView.isHidden
+        }
+    }
+    
+    private func getDisplayCount() -> Int {
+        let inviteCount = allInvitesFriends.count
+        if inviteCount <= collapsedDisplayCount {
+            return inviteCount
+        } else {
+            return isInviteListExpanded ? inviteCount : collapsedDisplayCount
+        }
     }
     
     private func calculateTotalHeight() -> CGFloat {
-        let baseHeight: CGFloat = 192.scalePt() // 原始高度
+        let baseHeight: CGFloat = 192.scalePt()
         let inviteCount = allInvitesFriends.count
         
         if inviteCount == 0 {
             return baseHeight
         } else {
-            // 每個cell高度70pt + 間距10pt，但最後一個cell沒有間距
-            let tableViewHeight = CGFloat(inviteCount) * 70.scalePt() + CGFloat(max(0, inviteCount - 0)) * 10.scalePt()
+            let displayCount = getDisplayCount()
+            let tableViewHeight = CGFloat(displayCount) * 70.scalePt() + CGFloat(max(0, displayCount - 1)) * 10.scalePt()
             return baseHeight + tableViewHeight
         }
+    }
+    
+    private func toggleInviteListExpansion() {
+        // 只有當邀請數量大於縮合顯示數量時才能展開/收合
+        guard allInvitesFriends.count > collapsedDisplayCount else { return }
+        
+        isInviteListExpanded.toggle()
+        
+        // 動畫更新高度
+        UIView.animate(withDuration: 0.1, animations: {
+            self.updateTableViewHeight()
+            self.layoutIfNeeded()
+        }) { _ in
+            // 動畫完成後重新載入數據以顯示所有項目
+            self.inviteTableView.reloadData()
+        }
+        
+        // 通知父視圖高度變化
+        let newHeight = calculateTotalHeight()
+        heightDidChange?(newHeight)
+    }
+    
+    // 新增：單純縮合列表的方法
+    private func collapseInviteList() {
+        isInviteListExpanded = false
+        
+        // 動畫更新高度
+        UIView.animate(withDuration: 0.1, animations: {
+            self.updateTableViewHeight()
+            self.layoutIfNeeded()
+        }) { _ in
+            // 動畫完成後重新載入數據以顯示縮合狀態
+            self.inviteTableView.reloadData()
+        }
+        
+        // 通知父視圖高度變化
+        let newHeight = calculateTotalHeight()
+        heightDidChange?(newHeight)
     }
     
     func setSelectedTab(index: Int) {
@@ -225,25 +316,39 @@ class NavigationBarView: UIView {
         }
     }
     
+    // 修改：重構 updateInvitesList 方法
     func updateInvitesList(_ friends: [Friend], completion: @escaping (CGFloat) -> Void) {
+        // 1. 先重置展開狀態
+        isInviteListExpanded = false
+        
+        // 2. 更新數據
         allInvitesFriends = friends.filter { $0.status == 2 }
         
-        // 計算新的總高度並通過completion回調
+        // 3. 更新TableView高度
+        updateTableViewHeight()
+        
+        // 4. 重新載入數據
+        inviteTableView.reloadData()
+        
+        // 5. 計算新的總高度並通過completion回調
         let newHeight = calculateTotalHeight()
         completion(newHeight)
     }
 }
 
-extension NavigationBarView: UITableViewDataSource, UITableViewDelegate {
+extension InviteListView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allInvitesFriends.count
+        return getDisplayCount()
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "InviteCell", for: indexPath) as? InviteListCell else {
             return UITableViewCell()
         }
-        cell.configure(with: allInvitesFriends[indexPath.row])
+        
+        let friend = allInvitesFriends[indexPath.row]
+        cell.configure(with: friend)
+        
         return cell
     }
 
@@ -257,5 +362,19 @@ extension NavigationBarView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 0.01
+    }
+    
+    // 處理cell點擊事件
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        // 如果是縮合狀態且有更多邀請，點擊任何cell都會展開
+        if !isInviteListExpanded && allInvitesFriends.count > collapsedDisplayCount {
+            toggleInviteListExpansion()
+        }
+        // 如果已經展開，點擊任何cell都會縮合
+        else if isInviteListExpanded {
+            collapseInviteList()
+        }
     }
 }

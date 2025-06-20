@@ -28,13 +28,8 @@ class InviteListCell: UITableViewCell {
     private func setupCell() {
         backgroundColor = .clear
         selectionStyle = .none
-
-//        containerView.layer.cornerRadius = 6.scalePt()
-//        containerView.layer.shadowRadius = 8.scalePt()
-//        containerView.layer.shadowOpacity = 0.1
-//        containerView.layer.shadowColor = UIColor.black.cgColor
-//        containerView.layer.shadowOffset = .zero // 所有方向都有陰影
-//        containerView.layer.masksToBounds = false
+        
+        containerView.layer.cornerRadius = 6.scalePt()
         containerView.backgroundColor = .white
         containerView.translatesAutoresizingMaskIntoConstraints = false
 

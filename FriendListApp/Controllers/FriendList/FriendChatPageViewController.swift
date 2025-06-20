@@ -13,10 +13,10 @@ class FriendChatPageViewController: UIViewController {
     private let viewModel = FriendViewModel()
 
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
-    private let navigationBar = NavigationBarView()
+    private let inviteListView = InviteListView()
 
-    // 添加navigationBar高度約束的變數
-    private var navigationBarHeightConstraint: NSLayoutConstraint!
+    // 添加inviteList高度約束的變數
+    private var inviteListHeightConstraint: NSLayoutConstraint!
 
     private lazy var pages: [UIViewController] = {
         return [FriendViewController(), ChatViewController()]
@@ -30,6 +30,7 @@ class FriendChatPageViewController: UIViewController {
         
         setupLayout()
         setupPageViewController()
+        setupEvent()
         getUserData()
         
         if MainContentManager.shared.currentType == .invitedFriend {
@@ -46,8 +47,8 @@ class FriendChatPageViewController: UIViewController {
         viewModel.fetchUsers { users in
             if let user = users.first {
                 print("使用者名稱：\(user.name)，KOKO ID：\(user.kokoid)")
-                self.navigationBar.userName = user.name
-                self.navigationBar.kokoID = user.kokoid
+                self.inviteListView.userName = user.name
+                self.inviteListView.kokoID = user.kokoid
             }
         }
     }
@@ -55,17 +56,17 @@ class FriendChatPageViewController: UIViewController {
     func getInvitesData() -> Void {
         viewModel.fetchFriends(urls: [apiDatasource4]) { [weak self] friends in
             DispatchQueue.main.async {
-                self?.navigationBar.updateInvitesList(friends) { [weak self] newHeight in
-                    // 動態更新NavigationBar高度
-                    self?.updateNavigationBarHeight(newHeight)
+                self?.inviteListView.updateInvitesList(friends) { [weak self] newHeight in
+                    // 動態更新InviteList高度
+                    self?.updateInviteListHeight(newHeight)
                 }
             }
         }
     }
     
-    // 新增方法：更新NavigationBar高度
-    private func updateNavigationBarHeight(_ newHeight: CGFloat) {
-        navigationBarHeightConstraint.constant = newHeight
+    // 新增方法：更新InviteList高度
+    private func updateInviteListHeight(_ newHeight: CGFloat) {
+        inviteListHeightConstraint.constant = newHeight
         
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -77,28 +78,28 @@ class FriendChatPageViewController: UIViewController {
     }
 
     private func setupLayout() {
-        [navigationBar, pageViewController.view].forEach {
+        [inviteListView, pageViewController.view].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
         // 使用變數儲存高度約束
-        navigationBarHeightConstraint = navigationBar.heightAnchor.constraint(equalToConstant: 192.scalePt())
+        inviteListHeightConstraint = inviteListView.heightAnchor.constraint(equalToConstant: 192.scalePt())
 
         NSLayoutConstraint.activate([
-            navigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            navigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            navigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            navigationBarHeightConstraint,
+            inviteListView.topAnchor.constraint(equalTo: view.topAnchor),
+            inviteListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            inviteListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            inviteListHeightConstraint,
  
-            pageViewController.view.topAnchor.constraint(equalTo: navigationBar.bottomAnchor),
+            pageViewController.view.topAnchor.constraint(equalTo: inviteListView.bottomAnchor),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        navigationBar.friendTabButton.addTarget(self, action: #selector(showFriendPage), for: .touchUpInside)
-        navigationBar.chatTabButton.addTarget(self, action: #selector(showChatPage), for: .touchUpInside)
+        inviteListView.friendTabButton.addTarget(self, action: #selector(showFriendPage), for: .touchUpInside)
+        inviteListView.chatTabButton.addTarget(self, action: #selector(showChatPage), for: .touchUpInside)
     }
     
     private func setupPageViewController() {
@@ -107,7 +108,14 @@ class FriendChatPageViewController: UIViewController {
         pageViewController.dataSource = self
         pageViewController.delegate = self
         pageViewController.setViewControllers([pages[0]], direction: .forward, animated: false)
-        
+    }
+    
+    private func setupEvent() {
+        // 設置高度變化回調
+        inviteListView.heightDidChange = { [weak self] newHeight in
+            // 更新父視圖的約束或佈局
+            self?.updateInviteListHeight(newHeight)
+        }
         // 設置 FriendViewController 的 onRequestRefresh 回調
         if let friendViewController = pages[0] as? FriendViewController {
             friendViewController.onRequestRefresh = { [weak self] type in
@@ -123,7 +131,7 @@ class FriendChatPageViewController: UIViewController {
         if currentIndex != 0 {
             pageViewController.setViewControllers([pages[0]], direction: .reverse, animated: true)
             currentIndex = 0
-            navigationBar.setSelectedTab(index: currentIndex)
+            inviteListView.setSelectedTab(index: currentIndex)
         }
     }
     
@@ -131,7 +139,7 @@ class FriendChatPageViewController: UIViewController {
         if currentIndex != 1 {
             pageViewController.setViewControllers([pages[1]], direction: .forward, animated: true)
             currentIndex = 1
-            navigationBar.setSelectedTab(index: currentIndex)
+            inviteListView.setSelectedTab(index: currentIndex)
         }
     }
 }
@@ -151,7 +159,7 @@ extension FriendChatPageViewController: UIPageViewControllerDataSource, UIPageVi
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         if completed, let visibleVC = pageViewController.viewControllers?.first, let index = pages.firstIndex(of: visibleVC) {
             currentIndex = index
-            navigationBar.setSelectedTab(index: currentIndex)
+            inviteListView.setSelectedTab(index: currentIndex)
         }
     }
 }
