@@ -9,9 +9,6 @@ class InviteListView: UIView {
     let friendTabButton = UIButton()
     let chatTabButton = UIButton()
     private let indicatorView = UIView()
-    private let atmButton = UIButton()
-    private let transferButton = UIButton()
-    private let qrButton = UIButton()
     private let avatarView = UIImageView()
     private let nameLabel = UILabel()
     private let setIdLabel = UILabel()
@@ -68,9 +65,6 @@ class InviteListView: UIView {
         backgroundColor = UIColor(red: 252/255.0, green: 252/255.0, blue: 252/255.0, alpha: 1)
 
         // 圖片設定
-        atmButton.setImage(UIImage(named: "atm"), for: .normal)
-        transferButton.setImage(UIImage(named: "$"), for: .normal)
-        qrButton.setImage(UIImage(named: "qr"), for: .normal)
         avatarView.image = UIImage(named: "avatar")
 
         // avatar 圓角保持
@@ -112,8 +106,8 @@ class InviteListView: UIView {
             view.isHidden = true // 初始隱藏
         }
 
-        // 加入 subviews - 注意順序，背景層要在 tableView 之前
-        [atmButton, transferButton, qrButton, avatarView, nameLabel, setIdLabel, stackedBackgroundView2, stackedBackgroundView1, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
+        // 加入 subviews - 注意順序，背景層要在 tableView 之前，移除三個按鈕
+        [avatarView, nameLabel, setIdLabel, stackedBackgroundView2, stackedBackgroundView1, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -134,35 +128,16 @@ class InviteListView: UIView {
         inviteTableView.layer.shadowOffset = .zero
         inviteTableView.layer.masksToBounds = false
 
-        // 設定 constraint
+        // 設定 constraint - 移除三個按鈕相關的約束
         NSLayoutConstraint.activate([
-            // QR
-            qrButton.topAnchor.constraint(equalTo: topAnchor, constant: 0.scalePt()),
-            qrButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.scalePt()),
-            
-            // ATM
-            atmButton.centerYAnchor.constraint(equalTo: qrButton.centerYAnchor, constant: 0.scalePt()),
-            atmButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.scalePt()),
-
-            // Transfer
-            transferButton.centerYAnchor.constraint(equalTo: qrButton.centerYAnchor, constant: 0.scalePt()),
-            transferButton.leadingAnchor.constraint(equalTo: atmButton.trailingAnchor, constant: 24.scalePt()),
-            
-            qrButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
-            qrButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
-            atmButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
-            atmButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
-            transferButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
-            transferButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
-            
-            // Avatar
-            avatarView.topAnchor.constraint(equalTo: qrButton.bottomAnchor, constant: 27.scalePt()),
+            // Avatar - 調整 top 約束，直接基於 topAnchor
+            avatarView.topAnchor.constraint(equalTo: topAnchor, constant: 27.scalePt()),
             avatarView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
             avatarView.widthAnchor.constraint(equalToConstant: 52.scalePt()),
             avatarView.heightAnchor.constraint(equalToConstant: 52.scalePt()),
 
-            // NameLabel
-            nameLabel.topAnchor.constraint(equalTo: atmButton.bottomAnchor, constant: 35.scalePt()),
+            // NameLabel - 調整 top 約束，直接基於 topAnchor
+            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 35.scalePt()),
             nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
 
             // SetIdLabel

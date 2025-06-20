@@ -6,12 +6,21 @@
 //
 
 import Foundation
+//
+//  MainViewController.swift
+//  FriendListApp
+//
+//  Created by 洋洋 on 2025/6/10.
+//
+
+import Foundation
 import UIKit
 
 class MainViewController: UIViewController {
     
     private let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     private let tabBarView = TabBarView()
+    private let navigationBarView = NavigationBarView()
 
     private lazy var pages: [UIViewController] = {
         return [
@@ -46,18 +55,26 @@ class MainViewController: UIViewController {
     
     private func setupLayout() {
         
-        [pageViewController.view, tabBarView].forEach {
+        [navigationBarView, pageViewController.view, tabBarView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
         NSLayoutConstraint.activate([
+            // NavigationBarView 約束
+            navigationBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            navigationBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            navigationBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            navigationBarView.heightAnchor.constraint(equalToConstant: 51.scalePt()), // 原本按鈕區域的高度
+            
+            // TabBarView 約束
             tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tabBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBarView.heightAnchor.constraint(equalToConstant: 54.scalePt()),
             
-            pageViewController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            // PageViewController 約束 - 現在頂部對齊 NavigationBarView 底部
+            pageViewController.view.topAnchor.constraint(equalTo: navigationBarView.bottomAnchor),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: tabBarView.topAnchor),
