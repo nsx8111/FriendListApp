@@ -173,6 +173,9 @@ class FriendListView: UIView {
     private var filteredFriends: [Friend] = []
 
     var onRequestRefresh: ((MainContentType) -> Void)?
+    
+    // 新增：搜索狀態變化回調
+    var onSearchStateChanged: ((Bool) -> Void)?
 
     // MARK: - Init
     override init(frame: CGRect) {
@@ -330,10 +333,20 @@ extension FriendListView: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-
+// MARK: - UITextFieldDelegate
 extension FriendListView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+    
+    // 新增：當開始編輯時通知父視圖
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        onSearchStateChanged?(true)
+    }
+    
+    // 新增：當結束編輯時通知父視圖
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        onSearchStateChanged?(false)
     }
 }

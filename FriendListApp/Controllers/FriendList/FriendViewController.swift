@@ -18,6 +18,9 @@ class FriendViewController: UIViewController {
     // 添加回調屬性，供 FriendChatPageViewController 監聽
     var onRequestRefresh: ((MainContentType) -> Void)?
     
+    // 新增：搜索狀態變化回調
+    var onSearchStateChanged: ((Bool) -> Void)?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -27,6 +30,11 @@ class FriendViewController: UIViewController {
         friendListView.onRequestRefresh = { [weak self] type in
             self?.setupView(for: type)
             self?.onRequestRefresh?(type)
+        }
+        
+        // 新增：設置搜索狀態變化回調
+        friendListView.onSearchStateChanged = { [weak self] isSearching in
+            self?.onSearchStateChanged?(isSearching)
         }
     }
     

@@ -16,6 +16,12 @@ class FriendChatPageViewController: UIViewController {
 
     // 添加inviteList高度約束的變數
     private var inviteListHeightConstraint: NSLayoutConstraint!
+    
+    // 新增：頁面視圖的top約束
+    private var pageViewTopConstraint: NSLayoutConstraint!
+    
+    // 新增：InviteListView的原始高度
+    private var originalInviteListHeight: CGFloat = 192.scalePt()
 
     private lazy var pages: [UIViewController] = {
         return [FriendViewController(), ChatViewController()]
@@ -68,7 +74,10 @@ class FriendChatPageViewController: UIViewController {
         }
 
         // 使用變數儲存高度約束
-        inviteListHeightConstraint = inviteListView.heightAnchor.constraint(equalToConstant: 192.scalePt())
+        inviteListHeightConstraint = inviteListView.heightAnchor.constraint(equalToConstant: originalInviteListHeight)
+        
+        // 設置頁面視圖的top約束
+        pageViewTopConstraint = pageViewController.view.topAnchor.constraint(equalTo: inviteListView.bottomAnchor)
 
         NSLayoutConstraint.activate([
             inviteListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -76,7 +85,7 @@ class FriendChatPageViewController: UIViewController {
             inviteListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             inviteListHeightConstraint,
  
-            pageViewController.view.topAnchor.constraint(equalTo: inviteListView.bottomAnchor),
+            pageViewTopConstraint,
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -107,6 +116,11 @@ class FriendChatPageViewController: UIViewController {
                 if type == .invitedFriend {
                     self?.getInvitesData()
                 }
+            }
+            
+            // 新增：設置搜索狀態變化回調
+            friendViewController.onSearchStateChanged = { [weak self] isSearching in
+                self?.handleSearchStateChange(isSearching)
             }
         }
     }
@@ -141,10 +155,25 @@ class FriendChatPageViewController: UIViewController {
     // 更新InviteList高度
     private func updateInviteListHeight(_ newHeight: CGFloat) {
         inviteListHeightConstraint.constant = newHeight
+        originalInviteListHeight = newHeight
         
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
+    }
+    
+    // 新增：處理搜索狀態變化
+    private func handleSearchStateChange(_ isSearching: Bool) {
+        if isSearching {
+            pageViewTopConstraint.constant = -originalInviteListHeight
+        } else {
+            // 當結束搜索時，恢復原始位置
+            pageViewTopConstraint.constant = 0
+        }
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            self.view.layoutIfNeeded()
+        }, completion: nil)
     }
     
     // MARK: - Public Methods
@@ -191,6 +220,8 @@ class FriendChatPageViewController: UIViewController {
         }
     }
 }
+
+// MARK: - UIPageView
 
 // MARK: - UIPageViewControllerDataSource
 
