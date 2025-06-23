@@ -6,14 +6,6 @@
 //
 
 import Foundation
-//
-//  MainViewController.swift
-//  FriendListApp
-//
-//  Created by 洋洋 on 2025/6/10.
-//
-
-import Foundation
 import UIKit
 
 class MainViewController: UIViewController {
@@ -44,7 +36,7 @@ class MainViewController: UIViewController {
             let statusBarHeight = window.safeAreaInsets.top
             print("狀態列高度: \(statusBarHeight)")
         }
-        
+        navigationBarView.backgroundColor  = .systemBlue
         setupLayout()
         setupPageViewController()
         
@@ -59,13 +51,26 @@ class MainViewController: UIViewController {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-
+        
+        // 計算狀態列高度
+        let statusBarHeight: CGFloat
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.windows.first {
+            statusBarHeight = window.safeAreaInsets.top
+        } else {
+            statusBarHeight = 44 // 預設值
+        }
+        
+        // NavigationBarView 高度 = 狀態列高度 + 按鈕高度(24)
+        let navigationBarHeight = statusBarHeight + 24.scalePt()
+        
         NSLayoutConstraint.activate([
             // NavigationBarView 約束
-            navigationBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            navigationBarView.topAnchor.constraint(equalTo: view.topAnchor), // 改為對齊 view.topAnchor 而非 safeAreaLayoutGuide
             navigationBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             navigationBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            navigationBarView.heightAnchor.constraint(equalToConstant: 51.scalePt()), // 原本按鈕區域的高度
+            navigationBarView.heightAnchor.constraint(equalToConstant: navigationBarHeight),
             
             // TabBarView 約束
             tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),

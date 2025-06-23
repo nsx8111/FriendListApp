@@ -36,23 +36,23 @@ class NavigationBarView: UIView {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        // 設定 constraints
+        // 設定 constraints - 所有按鈕底部貼齊 superview 底部
         NSLayoutConstraint.activate([
             // ATM Button
             atmButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.scalePt()),
-            atmButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            atmButton.bottomAnchor.constraint(equalTo: bottomAnchor),
             atmButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
             atmButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
             
             // Transfer Button
             transferButton.leadingAnchor.constraint(equalTo: atmButton.trailingAnchor, constant: 24.scalePt()),
-            transferButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            transferButton.bottomAnchor.constraint(equalTo: bottomAnchor),
             transferButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
             transferButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
             
             // QR Button
             qrButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.scalePt()),
-            qrButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            qrButton.bottomAnchor.constraint(equalTo: bottomAnchor),
             qrButton.widthAnchor.constraint(equalToConstant: 24.scalePt()),
             qrButton.heightAnchor.constraint(equalToConstant: 24.scalePt())
         ])
