@@ -66,12 +66,12 @@ class FriendListView: UIView {
         return button
     }()
 
-    private let tableView: UITableView = {
+    private let friendTableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = UIColor.white
         tableView.separatorStyle = .singleLine
         tableView.separatorColor = UIColor.systemGray5
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 71.scalePt(), bottom: 0, right: 0)
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 85.scalePt(), bottom: 0, right: 10)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
@@ -198,7 +198,7 @@ class FriendListView: UIView {
     private func setupUI() {
         backgroundColor = .white
 
-        [searchTextField, searchIcon, addFriendButton, tableView,
+        [searchTextField, searchIcon, addFriendButton, friendTableView,
          imageView, titleLabel, descLabel, addButton, helpContainerView].forEach { addSubview($0)
             $0.isHidden = true
         }
@@ -230,10 +230,10 @@ class FriendListView: UIView {
             addFriendButton.heightAnchor.constraint(equalToConstant: 24.scalePt()),
             addFriendButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
 
-            tableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10.scalePt()),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.scalePt()),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.scalePt()),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            friendTableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10.scalePt()),
+            friendTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.scalePt()),
+            friendTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.scalePt()),
+            friendTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             // 無好友畫面
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -267,18 +267,18 @@ class FriendListView: UIView {
     }
 
     private func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(FriendListCell.self, forCellReuseIdentifier: "FriendCell")
+        friendTableView.delegate = self
+        friendTableView.dataSource = self
+        friendTableView.register(FriendListCell.self, forCellReuseIdentifier: "FriendCell")
         refreshControl.addTarget(self, action: #selector(refreshFriendList), for: .valueChanged)
-        tableView.refreshControl = refreshControl
+        friendTableView.refreshControl = refreshControl
     }
 
     // MARK: - Public Methods
     func updateFriendList(_ friends: [Friend]) {
         allFriends = friends.filter { $0.status == 0 || $0.status == 1 }
         filteredFriends = friends.filter { $0.status == 0 || $0.status == 1 }
-        tableView.reloadData()
+        friendTableView.reloadData()
         updateVisibility()
     }
 
@@ -292,7 +292,7 @@ class FriendListView: UIView {
         searchTextField.isHidden = !hasData
         searchIcon.isHidden = !hasData
         addFriendButton.isHidden = !hasData
-        tableView.isHidden = false
+        friendTableView.isHidden = false
         imageView.isHidden = hasData
         titleLabel.isHidden = hasData
         descLabel.isHidden = hasData
@@ -304,7 +304,7 @@ class FriendListView: UIView {
     @objc private func searchTextChanged(_ sender: UITextField) {
         let keyword = sender.text?.lowercased() ?? ""
         filteredFriends = keyword.isEmpty ? allFriends : allFriends.filter { $0.name.contains(keyword) }
-        tableView.reloadData()
+        friendTableView.reloadData()
     }
     
     // 按下清除按鈕時執行

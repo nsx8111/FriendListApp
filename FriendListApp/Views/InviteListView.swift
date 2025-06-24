@@ -17,6 +17,7 @@ class InviteListView: UIView {
         line.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
         return line
     }()
+    
     private let inviteTableView: UITableView = {
         let tv = UITableView()
         tv.isScrollEnabled = false
@@ -168,7 +169,7 @@ class InviteListView: UIView {
             chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor, constant: 0.scalePt()),
             chatTabButton.leadingAnchor.constraint(equalTo: friendTabButton.trailingAnchor, constant: 36.scalePt()),
             
-            indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 4.scalePt()),
+            indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 9.scalePt()),
             indicatorCenterXConstraint,
             indicatorView.widthAnchor.constraint(equalToConstant: 20.scalePt()),
             indicatorView.heightAnchor.constraint(equalToConstant: 4.scalePt()),
@@ -221,7 +222,8 @@ class InviteListView: UIView {
     }
     
     private func calculateTotalHeight() -> CGFloat {
-        let baseHeight: CGFloat = 192.scalePt()
+        let baseHeight: CGFloat = 192.scalePt()-24.scalePt()
+//        let baseHeight: CGFloat = 192.scalePt() - AppMetrics.statusBarHeight - 24.scalePt()
         let inviteCount = allInvitesFriends.count
         
         if inviteCount == 0 {

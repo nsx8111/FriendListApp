@@ -1,25 +1,9 @@
 //
-//  MainContentManager.swift
+//  GlobalVariables.swift
 //  FriendListApp
 //
-//  Created by 洋洋 on 2025/6/18.
+//  Created by 洋洋 on 2025/6/25.
 //
-
-import Foundation
-
-class MainContentManager {
-    static let shared = MainContentManager()
-    private init() {}
-    
-    var currentType: MainContentType = .noFriend
-}
-
-enum MainContentType {
-    case noFriend
-    case noInvitations
-    case invitedFriend
-}
-
 
 let apiDatasource1: String = "https://dimanyen.github.io/man.json"
 let apiDatasource2: String = "https://dimanyen.github.io/friend1.json"

@@ -30,13 +30,6 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        if let window = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .first?.windows.first {
-            let statusBarHeight = window.safeAreaInsets.top
-            print("狀態列高度: \(statusBarHeight)")
-        }
-
         setupLayout()
         setupPageViewController()
         
@@ -52,18 +45,10 @@ class MainViewController: UIViewController {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        // 計算狀態列高度
-        let statusBarHeight: CGFloat
-        if let window = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .first?.windows.first {
-            statusBarHeight = window.safeAreaInsets.top
-        } else {
-            statusBarHeight = 44 // 預設值
-        }
-        
         // NavigationBarView 高度 = 狀態列高度 + 按鈕高度(24)
+        let statusBarHeight = AppMetrics.statusBarHeight
         let navigationBarHeight = statusBarHeight + 24.scalePt()
+        print("statusBarHeight",statusBarHeight,navigationBarHeight)
         
         NSLayoutConstraint.activate([
             // NavigationBarView 約束
@@ -95,7 +80,6 @@ class MainViewController: UIViewController {
     }
     
     private func switchToPage(index: Int) {
-//        print("currentIndex",index, currentIndex)
         let direction: UIPageViewController.NavigationDirection = index > currentIndex ? .forward : .reverse
         pageViewController.setViewControllers([pages[index]], direction: direction, animated: true)
         currentIndex = index
