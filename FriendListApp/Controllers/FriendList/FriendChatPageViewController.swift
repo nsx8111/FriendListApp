@@ -171,7 +171,7 @@ class FriendChatPageViewController: UIViewController {
             pageViewTopConstraint.constant = 0
         }
         
-        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+        UIView.animate(withDuration: 0.0, delay: 0, options: [.curveEaseInOut], animations: {
             self.view.layoutIfNeeded()
         }, completion: nil)
     }

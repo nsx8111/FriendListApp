@@ -9,7 +9,7 @@ import UIKit
 
 class FriendListView: UIView {
     // MARK: - UI Components
-
+    
     // === NoInvitationsView InvitedFriendView UI ===
     private let searchTextField: UITextField = {
         let textField = UITextField()
@@ -28,24 +28,30 @@ class FriendListView: UIView {
         textField.font = .pingFangTC(.regular, size: 16.scalePt())
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.addTarget(self, action: #selector(searchTextChanged(_:)), for: .editingChanged)
-
-        // Clear button
-        let clearButton = UIButton(type: .custom)
-        clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        clearButton.tintColor = .lightGray
-        clearButton.frame = CGRect(x: 0, y: 0, width: 20.scalePt(), height: 20.scalePt())
-        clearButton.addTarget(nil, action: #selector(clearSearchText), for: .touchUpInside)
-
-        let containerView = UIView(frame: CGRect(x: 0, y: 0, width: 30.scalePt(), height: 36.scalePt()))
-        clearButton.center = CGPoint(x: 10.scalePt(), y: containerView.frame.height / 2)
-        containerView.addSubview(clearButton)
-
-        textField.rightView = containerView
-        textField.rightViewMode = .whileEditing
-
+        
         return textField
     }()
+    
+    // 將 clearButton 設定移到 setupUI 方法中
+    private func setupClearButton() {
+        let clearImageView = UIImageView(image: UIImage(systemName: "xmark.circle.fill"))
+        clearImageView.tintColor = .lightGray
+        clearImageView.contentMode = .scaleAspectFit
+        clearImageView.isUserInteractionEnabled = true
+        clearImageView.frame = CGRect(x: 0, y: 0, width: 20.scalePt(), height: 20.scalePt())
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(clearSearchText))
+        clearImageView.addGestureRecognizer(tapGesture)
+        
+        let containerView = UIView(frame: CGRect(x: 0, y: 0, width: 30.scalePt(), height: 36.scalePt()))
+        clearImageView.center = CGPoint(x: 10.scalePt(), y: containerView.frame.height / 2)
+        containerView.addSubview(clearImageView)
+        containerView.addGestureRecognizer(tapGesture)
 
+        searchTextField.rightView = containerView
+        searchTextField.rightViewMode = .whileEditing
+    }
+    
     private let searchIcon: UIImageView = {
         let iv = UIImageView(image: UIImage(systemName: "magnifyingglass"))
         iv.tintColor = UIColor.systemGray3
@@ -139,7 +145,6 @@ class FriendListView: UIView {
         return button
     }()
 
-
     private let helpContainerView = UIView()
 
     private let helpLabel: UILabel = {
@@ -171,6 +176,7 @@ class FriendListView: UIView {
     // MARK: - State
     private var allFriends: [Friend] = []
     private var filteredFriends: [Friend] = []
+    private var isPreventingResign = false // 新增標記
 
     var onRequestRefresh: ((MainContentType) -> Void)?
     
@@ -197,6 +203,8 @@ class FriendListView: UIView {
             $0.isHidden = true
         }
         
+        setupClearButton()
+
         helpContainerView.addSubview(helpLabel)
         helpContainerView.addSubview(setKokoIdLabel)
         helpContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -299,10 +307,18 @@ class FriendListView: UIView {
         tableView.reloadData()
     }
     
+    // 按下清除按鈕時執行
+    @objc private func clearButtonTouchDown() {
+        isPreventingResign = true
+        // 保證焦點
+        searchTextField.becomeFirstResponder()
+    }
+
     @objc private func clearSearchText() {
         searchTextField.text = ""
         searchTextChanged(searchTextField)
-        searchTextField.resignFirstResponder()
+        // 保持鍵盤活著
+        searchTextField.becomeFirstResponder()
     }
     
     @objc private func refreshFriendList() {
@@ -338,6 +354,11 @@ extension FriendListView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+    
+    // 防止在點擊清除按鈕時失去焦點
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        return !isPreventingResign
     }
     
     // 新增：當開始編輯時通知父視圖

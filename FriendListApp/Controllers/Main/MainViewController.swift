@@ -36,7 +36,7 @@ class MainViewController: UIViewController {
             let statusBarHeight = window.safeAreaInsets.top
             print("狀態列高度: \(statusBarHeight)")
         }
-        navigationBarView.backgroundColor  = .systemBlue
+
         setupLayout()
         setupPageViewController()
         
