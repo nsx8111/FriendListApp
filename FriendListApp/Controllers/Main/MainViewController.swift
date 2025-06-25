@@ -31,7 +31,7 @@ class MainViewController: UIViewController {
         view.backgroundColor = .white
         setupLayout()
         setupPageViewController()
-        setupEvents()
+        setupEvent()
     }
     
     private func setupLayout() {
@@ -75,7 +75,7 @@ class MainViewController: UIViewController {
         pageViewController.setViewControllers([pages[1]], direction: .forward, animated: false)
     }
     
-    private func setupEvents() {
+    private func setupEvent() {
         tabBarView.onTabSelected = { [weak self] index in
             self?.switchToPage(index: index)
         }

@@ -26,10 +26,10 @@ class FriendViewController: UIViewController {
         view.backgroundColor = .white
         
         setupView(for: currentType)
-        setupEvents()
+        setupEvent()
     }
     
-    private func setupEvents() {
+    private func setupEvent() {
         friendListView.onRequestRefresh = { [weak self] type in
             self?.setupView(for: type)
             self?.onRequestRefresh?(type)

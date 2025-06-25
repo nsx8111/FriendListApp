@@ -35,7 +35,7 @@ class FriendChatPageViewController: UIViewController {
         
         setupLayout()
         setupPageViewController()
-        setupEvents()
+        setupEvent()
         getUserData()
         
         if MainContentManager.shared.currentType == .invitedFriend {
@@ -103,7 +103,7 @@ class FriendChatPageViewController: UIViewController {
         pageViewController.setViewControllers([pages[0]], direction: .forward, animated: false)
     }
     
-    private func setupEvents() {
+    private func setupEvent() {
         // 設置高度變化回調
         inviteListView.heightDidChange = { [weak self] newHeight in
             self?.updateInviteListHeight(newHeight)
