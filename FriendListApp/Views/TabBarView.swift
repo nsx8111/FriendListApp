@@ -1,3 +1,10 @@
+//
+//  TabBarView.swift
+//  FriendListApp
+//
+//  Created by 洋洋 on 2025/6/21.
+//
+
 import UIKit
 
 class TabBarView: UIView {

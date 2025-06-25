@@ -1,5 +1,5 @@
 //
-//  Friend.swift
+//  Struct.swift
 //  FriendListApp
 //
 //  Created by 洋洋 on 2025/6/17.

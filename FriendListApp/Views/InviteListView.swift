@@ -1,3 +1,10 @@
+//
+//  InviteListView.swift
+//  FriendListApp
+//
+//  Created by 洋洋 on 2025/6/11.
+//
+
 import UIKit
 
 class InviteListView: UIView {

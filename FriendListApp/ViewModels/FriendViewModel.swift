@@ -1,3 +1,10 @@
+//
+//  FriendViewModel.swift
+//  FriendListApp
+//
+//  Created by 洋洋 on 2025/6/18.
+//
+
 import Foundation
 import UIKit
 
