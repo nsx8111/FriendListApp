@@ -229,21 +229,16 @@ class InviteListView: UIView {
     }
     
     private func calculateTotalHeight() -> CGFloat {
-        var baseHeight: CGFloat = 137.scalePt()
         let inviteCount = allInvitesFriends.count
-        
+        let baseHeight: CGFloat = 137.scalePt()
+
         if inviteCount == 0 {
-            return baseHeight
+            return baseHeight // 保持固定高度以防跑版
         } else {
             let displayCount = getDisplayCount()
             let tableViewHeight = CGFloat(displayCount) * 80
-            if displayCount == 1 {
-                baseHeight = baseHeight + CGFloat(32.scalePt())
-            } else {
-                baseHeight = baseHeight + CGFloat(42.scalePt())
-            }
-            print("totalHeight",displayCount, baseHeight + tableViewHeight)
-            return baseHeight + tableViewHeight
+            let extraSpacing: CGFloat = displayCount == 1 ? 32.scalePt() : 42.scalePt()
+            return baseHeight + tableViewHeight + extraSpacing
         }
     }
     
@@ -267,7 +262,7 @@ class InviteListView: UIView {
         heightDidChange?(newHeight)
     }
     
-    // 新增：單純縮合列表的方法
+    // 單純縮合列表的方法
     private func collapseInviteList() {
         isInviteListExpanded = false
         

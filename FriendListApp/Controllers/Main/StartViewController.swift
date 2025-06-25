@@ -44,8 +44,8 @@ class StartViewController: UIViewController {
         button.tag = tag
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
-        button.widthAnchor.constraint(equalToConstant: 220).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 220.scalePt()).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 50.scalePt()).isActive = true
         return button
     }
     
