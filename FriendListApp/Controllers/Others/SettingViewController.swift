@@ -12,7 +12,8 @@ class SettingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.systemGreen
+//        view.backgroundColor = UIColor.systemGreen
+        view.backgroundColor = UIColor.white
 
         let label = UILabel()
         label.text = "設定頁面"

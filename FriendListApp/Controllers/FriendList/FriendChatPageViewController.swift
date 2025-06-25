@@ -21,8 +21,7 @@ class FriendChatPageViewController: UIViewController {
     private var pageViewTopConstraint: NSLayoutConstraint!
     
     // 新增：InviteListView的原始高度
-    private var originalInviteListHeight: CGFloat = 192.scalePt()-24.scalePt()
-//    private var originalInviteListHeight: CGFloat = 192.scalePt() - AppMetrics.statusBarHeight - 24.scalePt()
+    private var originalInviteListHeight: CGFloat = 137.scalePt()
 
     private lazy var pages: [UIViewController] = {
         return [FriendViewController(), ChatViewController()]

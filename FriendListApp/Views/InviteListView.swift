@@ -222,15 +222,20 @@ class InviteListView: UIView {
     }
     
     private func calculateTotalHeight() -> CGFloat {
-        let baseHeight: CGFloat = 192.scalePt()-24.scalePt()
-//        let baseHeight: CGFloat = 192.scalePt() - AppMetrics.statusBarHeight - 24.scalePt()
+        var baseHeight: CGFloat = 137.scalePt()
         let inviteCount = allInvitesFriends.count
         
         if inviteCount == 0 {
             return baseHeight
         } else {
             let displayCount = getDisplayCount()
-            let tableViewHeight = CGFloat(displayCount) * 70.scalePt() + CGFloat(max(0, displayCount - 1)) * 10.scalePt()
+            let tableViewHeight = CGFloat(displayCount) * 80
+            if displayCount == 1 {
+                baseHeight = baseHeight + CGFloat(32.scalePt())
+            } else {
+                baseHeight = baseHeight + CGFloat(42.scalePt())
+            }
+            print("totalHeight",displayCount, baseHeight + tableViewHeight)
             return baseHeight + tableViewHeight
         }
     }

@@ -29,13 +29,9 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
         setupLayout()
         setupPageViewController()
-        
-        tabBarView.onTabSelected = { [weak self] index in
-            self?.switchToPage(index: index)
-        }
+        setupEvents()
     }
     
     private func setupLayout() {
@@ -70,13 +66,19 @@ class MainViewController: UIViewController {
             pageViewController.view.bottomAnchor.constraint(equalTo: tabBarView.topAnchor),
         ])
     }
-
+    
     private func setupPageViewController() {
         addChild(pageViewController)
         pageViewController.didMove(toParent: self)
         pageViewController.dataSource = self
         pageViewController.delegate = self
         pageViewController.setViewControllers([pages[1]], direction: .forward, animated: false)
+    }
+    
+    private func setupEvents() {
+        tabBarView.onTabSelected = { [weak self] index in
+            self?.switchToPage(index: index)
+        }
     }
     
     private func switchToPage(index: Int) {

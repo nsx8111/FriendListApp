@@ -12,7 +12,8 @@ class MoneyViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.systemIndigo
+//        view.backgroundColor = UIColor.systemIndigo
+        view.backgroundColor = UIColor.systemGray
 
         let label = UILabel()
         label.text = "錢錢頁面"

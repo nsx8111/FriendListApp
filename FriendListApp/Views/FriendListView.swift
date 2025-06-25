@@ -79,13 +79,13 @@ class FriendListView: UIView {
     private let refreshControl = UIRefreshControl()
 
     // === NoFriendView UI ===
-    private let imageView: UIImageView = {
+    private let addFriendImageView: UIImageView = {
         let iv = UIImageView(image: UIImage(named: "add_friend_illustration"))
         iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
-
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "就從加好友開始吧：）"
@@ -199,7 +199,7 @@ class FriendListView: UIView {
         backgroundColor = .white
 
         [searchTextField, searchIcon, addFriendButton, friendTableView,
-         imageView, titleLabel, descLabel, addButton, helpContainerView].forEach { addSubview($0)
+         addFriendImageView, titleLabel, descLabel, addButton, helpContainerView].forEach { addSubview($0)
             $0.isHidden = true
         }
         
@@ -236,12 +236,12 @@ class FriendListView: UIView {
             friendTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             // 無好友畫面
-            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            imageView.topAnchor.constraint(equalTo: topAnchor, constant: 30.scalePt()),
-            imageView.widthAnchor.constraint(equalToConstant: 245.scalePt()),
-            imageView.heightAnchor.constraint(equalToConstant: 172.scalePt()),
+            addFriendImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            addFriendImageView.topAnchor.constraint(equalTo: topAnchor, constant: 30.scalePt()),
+            addFriendImageView.widthAnchor.constraint(equalToConstant: 245.scalePt()),
+            addFriendImageView.heightAnchor.constraint(equalToConstant: 172.scalePt()),
 
-            titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 41.scalePt()),
+            titleLabel.topAnchor.constraint(equalTo: addFriendImageView.bottomAnchor, constant: 41.scalePt()),
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
 
             descLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8.scalePt()),
@@ -293,7 +293,7 @@ class FriendListView: UIView {
         searchIcon.isHidden = !hasData
         addFriendButton.isHidden = !hasData
         friendTableView.isHidden = false
-        imageView.isHidden = hasData
+        addFriendImageView.isHidden = hasData
         titleLabel.isHidden = hasData
         descLabel.isHidden = hasData
         addButton.isHidden = hasData

@@ -23,19 +23,19 @@ extension UIFont {
 
 
 extension CGFloat {
-    func scalePt(baseWidth: CGFloat = 390.0) -> CGFloat {
+    func scalePt(baseWidth: CGFloat = 375.0) -> CGFloat {
         let scaleFactor = UIScreen.main.bounds.width / baseWidth
         return self * scaleFactor
     }
     
-    func scalePtHeight(baseHeight: CGFloat = 844.0) -> CGFloat {
+    func scalePtHeight(baseHeight: CGFloat = 667.0) -> CGFloat {
         let scaleFactor = UIScreen.main.bounds.height / baseHeight
         return self * scaleFactor
     }
 }
 
 extension Int {
-    func scalePt(baseWidth: CGFloat = 390.0) -> CGFloat {
+    func scalePt(baseWidth: CGFloat = 375.0) -> CGFloat {
         let scaleFactor = UIScreen.main.bounds.width / baseWidth
         return CGFloat(self) * scaleFactor
     }

@@ -12,7 +12,8 @@ class AccountingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.systemYellow
+//        view.backgroundColor = UIColor.systemYellow
+        view.backgroundColor = UIColor.systemGray
 
         let label = UILabel()
         label.text = "記帳頁面"

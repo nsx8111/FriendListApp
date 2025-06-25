@@ -12,7 +12,8 @@ class KOKOViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.systemTeal
+//        view.backgroundColor = UIColor.systemTeal
+        view.backgroundColor = UIColor(red: 252/255.0, green: 252/255.0, blue: 252/255.0, alpha: 1)
 
         let label = UILabel()
         label.text = "KOKO頁面"
