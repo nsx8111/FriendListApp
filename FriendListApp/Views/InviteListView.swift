@@ -2,8 +2,6 @@
 //  InviteListView.swift
 //  FriendListApp
 //
-//  Created by 洋洋 on 2025/6/11.
-//
 
 import UIKit
 
@@ -12,6 +10,7 @@ class InviteListView: UIView {
     private var friendTabTopConstraintToSetIdLabel: NSLayoutConstraint!
     private var inviteTableViewHeightConstraint: NSLayoutConstraint!
     private var indicatorCenterXConstraint: NSLayoutConstraint!
+    private var indicatorBottomConstraint: NSLayoutConstraint!
     
     let friendTabButton = UIButton()
     let chatTabButton = UIButton()
@@ -48,15 +47,19 @@ class InviteListView: UIView {
     // 高度變化回調
     var heightDidChange: ((CGFloat) -> Void)?
     
-    var userName: String = "紫琳" {
+    var userName: String = "" {
         didSet {
             nameLabel.text = userName
+            // 強制更新布局
+            setNeedsLayout()
         }
     }
     
     var kokoID: String = "" {
         didSet {
             setIdLabel.text = "KOKO ID：\(kokoID) >"
+            // 強制更新布局
+            setNeedsLayout()
         }
     }
     
@@ -74,19 +77,24 @@ class InviteListView: UIView {
 
         // 圖片設定
         avatarView.image = UIImage(named: "avatar")
-
-        // avatar 圓角保持
         avatarView.clipsToBounds = true
         avatarView.layer.cornerRadius = 52.scalePt() / 2
+        avatarView.contentMode = .scaleAspectFill
 
-        // 文字設定
+        // 文字設定 - 增加更明確的約束優先級
         nameLabel.text = userName
         nameLabel.font = .pingFangTC(.medium, size: 17.scalePt())
         nameLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
+        nameLabel.numberOfLines = 1
+        nameLabel.setContentHuggingPriority(.required, for: .vertical)
+        nameLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
         setIdLabel.text = "KOKO ID：\(kokoID) >"
         setIdLabel.font = .pingFangTC(.regular, size: 13.scalePt())
         setIdLabel.textColor = UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0)
+        setIdLabel.numberOfLines = 1
+        setIdLabel.setContentHuggingPriority(.required, for: .vertical)
+        setIdLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
         // Tab 按鈕設定
         friendTabButton.setTitle("好友", for: .normal)
@@ -95,6 +103,7 @@ class InviteListView: UIView {
         [friendTabButton, chatTabButton].forEach {
             $0.setTitleColor(UIColor(red: 71/255, green: 71/255, blue: 71/255, alpha: 1.0), for: .normal)
             $0.titleLabel?.font = .pingFangTC(.medium, size: 13.scalePt())
+            $0.setContentHuggingPriority(.required, for: .vertical)
         }
         friendTabButton.setTitleColor(.systemPink, for: .normal)
 
@@ -114,18 +123,25 @@ class InviteListView: UIView {
             view.isHidden = true // 初始隱藏
         }
 
-        // 加入 subviews - 注意順序，背景層要在 tableView 之前，移除三個按鈕
+        // 加入 subviews - 注意順序，背景層要在 tableView 之前
         [avatarView, nameLabel, setIdLabel, stackedBackgroundView2, stackedBackgroundView1, inviteTableView, friendTabButton, chatTabButton, indicatorView, bottomLine].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: stackedBackgroundView1.bottomAnchor, constant: 22.scalePt())
+        // 初始化約束變數
+        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 22.scalePt())
         friendTabTopConstraintToSetIdLabel = friendTabButton.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 30.scalePt())
         
         indicatorCenterXConstraint = indicatorView.centerXAnchor.constraint(equalTo: friendTabButton.centerXAnchor)
         inviteTableViewHeightConstraint = inviteTableView.heightAnchor.constraint(equalToConstant: 0)
+        indicatorBottomConstraint = indicatorView.bottomAnchor.constraint(equalTo: bottomAnchor)
         
+        let indicatorTopConstraint = indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 9.scalePt())
+        indicatorTopConstraint.priority = .defaultHigh
+        indicatorTopConstraint.isActive = true
+        indicatorView.centerYAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 5.scalePt()).isActive = true
+
         inviteTableView.delegate = self
         inviteTableView.dataSource = self
         inviteTableView.register(InviteListCell.self, forCellReuseIdentifier: "InviteCell")
@@ -135,24 +151,29 @@ class InviteListView: UIView {
         inviteTableView.layer.shadowColor = UIColor.black.cgColor
         inviteTableView.layer.shadowOffset = .zero
         inviteTableView.layer.masksToBounds = false
-
-        // 設定 constraint - 移除三個按鈕相關的約束
+        
+        setupConstraints()
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Avatar - 調整 top 約束，直接基於 topAnchor
+            // Avatar - 固定位置約束，使用明確的數值
             avatarView.topAnchor.constraint(equalTo: topAnchor, constant: 27.scalePt()),
             avatarView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
             avatarView.widthAnchor.constraint(equalToConstant: 52.scalePt()),
             avatarView.heightAnchor.constraint(equalToConstant: 52.scalePt()),
 
-            // NameLabel - 調整 top 約束，直接基於 topAnchor
+            // NameLabel - 固定位置約束，避免與其他元件產生衝突
             nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 35.scalePt()),
             nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
+            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: avatarView.leadingAnchor, constant: -15.scalePt()),
 
-            // SetIdLabel
+            // SetIdLabel - 與 nameLabel 保持固定距離
             setIdLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8.scalePt()),
             setIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
-            
-            // InviteTableView - 根據UI設計調整間距
+            setIdLabel.trailingAnchor.constraint(lessThanOrEqualTo: avatarView.leadingAnchor, constant: -15.scalePt()),
+
+            // InviteTableView - 與 avatar 保持固定距離
             inviteTableView.topAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 35.scalePt()),
             inviteTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30.scalePt()),
             inviteTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30.scalePt()),
@@ -169,24 +190,45 @@ class InviteListView: UIView {
             stackedBackgroundView2.trailingAnchor.constraint(equalTo: inviteTableView.trailingAnchor, constant: -10.scalePt()),
             stackedBackgroundView2.bottomAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 10.scalePt()),
 
+            // Friend Tab Button - 使用較低的優先級避免衝突
             friendTabButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32.scalePt()),
-            friendTabTopConstraintToSetIdLabel,
             
             // Chat Tab Button
-            chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor, constant: 0.scalePt()),
+            chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor),
             chatTabButton.leadingAnchor.constraint(equalTo: friendTabButton.trailingAnchor, constant: 36.scalePt()),
             
-            indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 9.scalePt()),
+            // Indicator
             indicatorCenterXConstraint,
             indicatorView.widthAnchor.constraint(equalToConstant: 20.scalePt()),
             indicatorView.heightAnchor.constraint(equalToConstant: 4.scalePt()),
-            indicatorView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            indicatorBottomConstraint,
             
+            // Bottom Line
             bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor),
             bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor),
             bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor),
             bottomLine.heightAnchor.constraint(equalToConstant: 2 / UIScreen.main.scale)
         ])
+        
+        // 初始設置約束狀態
+        updateFriendTabConstraints()
+    }
+    
+    private func updateFriendTabConstraints() {
+        // 先停用所有相關約束
+        friendTabTopConstraintToInviteTableView.isActive = false
+        friendTabTopConstraintToSetIdLabel.isActive = false
+        
+        // 修復：根據 inviteTableView 的實際顯示狀態和高度來決定約束
+        let hasVisibleInvites = !inviteTableView.isHidden && inviteTableViewHeightConstraint.constant > 0
+        
+        if hasVisibleInvites {
+            // 當有可見的邀請時，friendTab 應該相對於 inviteTableView 定位
+            friendTabTopConstraintToInviteTableView.isActive = true
+        } else {
+            // 當沒有邀請或邀請被隱藏時，friendTab 應該相對於 setIdLabel 定位
+            friendTabTopConstraintToSetIdLabel.isActive = true
+        }
     }
     
     private func updateTableViewHeight() {
@@ -209,14 +251,8 @@ class InviteListView: UIView {
             stackedBackgroundView2.isHidden = !shouldShowStackedEffect || inviteCount <= 2
         }
         
-        // 根據是否顯示堆疊效果來選擇約束
-        if !stackedBackgroundView1.isHidden {
-            friendTabTopConstraintToInviteTableView.isActive = true
-            friendTabTopConstraintToSetIdLabel.isActive = false
-        } else {
-            friendTabTopConstraintToInviteTableView.isActive = !inviteTableView.isHidden
-            friendTabTopConstraintToSetIdLabel.isActive = inviteTableView.isHidden
-        }
+        // 更新約束 - 這裡是關鍵修復
+        updateFriendTabConstraints()
     }
     
     private func getDisplayCount() -> Int {
@@ -230,14 +266,16 @@ class InviteListView: UIView {
     
     private func calculateTotalHeight() -> CGFloat {
         let inviteCount = allInvitesFriends.count
-        let baseHeight: CGFloat = 137.scalePt()
-
+        let baseHeight: CGFloat = 137.scalePt() // 基礎高度（avatar + nameLabel + setIdLabel + friendTab + indicator + 間距）
+        var extraSpacing: CGFloat = 0
+        
         if inviteCount == 0 {
-            return baseHeight // 保持固定高度以防跑版
+//            extraSpacing = 16.scalePt()
+            return baseHeight + extraSpacing
         } else {
             let displayCount = getDisplayCount()
-            let tableViewHeight = CGFloat(displayCount) * 80
-            let extraSpacing: CGFloat = displayCount == 1 ? 32.scalePt() : 42.scalePt()
+            let tableViewHeight = CGFloat(displayCount) * 80.scalePt()
+            extraSpacing = displayCount == 1 ? 18.scalePt() : 18.scalePt()
             return baseHeight + tableViewHeight + extraSpacing
         }
     }
@@ -314,12 +352,26 @@ class InviteListView: UIView {
         // 4. 重新載入數據
         inviteTableView.reloadData()
         
-        // 5. 計算新的總高度並通過completion回調
+        // 5. 強制布局更新
+        setNeedsLayout()
+        layoutIfNeeded()
+        
+        // 6. 計算新的總高度並通過completion回調
         let newHeight = calculateTotalHeight()
         completion(newHeight)
     }
+    
+    // 重寫 layoutSubviews 確保布局正確
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        // 確保所有子視圖都正確布局
+        nameLabel.sizeToFit()
+        setIdLabel.sizeToFit()
+    }
 }
 
+// MARK: - TableView DataSource & Delegate
 extension InviteListView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return getDisplayCount()

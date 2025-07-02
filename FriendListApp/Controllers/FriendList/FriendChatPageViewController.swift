@@ -24,12 +24,21 @@ class FriendChatPageViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
+        
         if MainContentManager.shared.currentType == .invitedFriend {
             getInvitesData()
         }
+        
+        friendChatPageView.setNeedsLayout()
+        friendChatPageView.layoutIfNeeded()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        friendChatPageView.inviteListView.setNeedsLayout()
+        friendChatPageView.inviteListView.layoutIfNeeded()
+    }
     // MARK: - Setup Methods
     
     private func setupView() {
