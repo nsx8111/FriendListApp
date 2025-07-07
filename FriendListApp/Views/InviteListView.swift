@@ -130,17 +130,12 @@ class InviteListView: UIView {
         }
         
         // 初始化約束變數
-        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 22.scalePt())
+        friendTabTopConstraintToInviteTableView = friendTabButton.topAnchor.constraint(equalTo: inviteTableView.bottomAnchor, constant: 30.scalePt())
         friendTabTopConstraintToSetIdLabel = friendTabButton.topAnchor.constraint(equalTo: setIdLabel.bottomAnchor, constant: 30.scalePt())
         
         indicatorCenterXConstraint = indicatorView.centerXAnchor.constraint(equalTo: friendTabButton.centerXAnchor)
         inviteTableViewHeightConstraint = inviteTableView.heightAnchor.constraint(equalToConstant: 0)
         indicatorBottomConstraint = indicatorView.bottomAnchor.constraint(equalTo: bottomAnchor)
-        
-        let indicatorTopConstraint = indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 9.scalePt())
-        indicatorTopConstraint.priority = .defaultHigh
-        indicatorTopConstraint.isActive = true
-        indicatorView.centerYAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 5.scalePt()).isActive = true
 
         inviteTableView.delegate = self
         inviteTableView.dataSource = self
@@ -197,10 +192,13 @@ class InviteListView: UIView {
             chatTabButton.centerYAnchor.constraint(equalTo: friendTabButton.centerYAnchor),
             chatTabButton.leadingAnchor.constraint(equalTo: friendTabButton.trailingAnchor, constant: 36.scalePt()),
             
-            // Indicator
+            // Indicator - 修正这里，同时使用固定距离和底部约束来确保视图高度正确
             indicatorCenterXConstraint,
             indicatorView.widthAnchor.constraint(equalToConstant: 20.scalePt()),
             indicatorView.heightAnchor.constraint(equalToConstant: 4.scalePt()),
+            // 使用相对于 friendTabButton 的固定距离
+            indicatorView.topAnchor.constraint(equalTo: friendTabButton.bottomAnchor, constant: 9.scalePt()),
+            // 保持底部约束以确保整体高度正确
             indicatorBottomConstraint,
             
             // Bottom Line
@@ -275,7 +273,7 @@ class InviteListView: UIView {
         } else {
             let displayCount = getDisplayCount()
             let tableViewHeight = CGFloat(displayCount) * 80.scalePt()
-            extraSpacing = displayCount == 1 ? 18.scalePt() : 18.scalePt()
+            extraSpacing = displayCount == 1 ? 20.scalePt() : 20.scalePt()
             return baseHeight + tableViewHeight + extraSpacing
         }
     }
